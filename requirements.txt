@@ -1,4 +1,5 @@
 osmnx
+geocoder
 networkx
 numpy
 pandas
