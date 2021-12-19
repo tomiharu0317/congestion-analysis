@@ -17,7 +17,7 @@
 ├── data
 │   └── tachikawa.graphml           # 立川市の道路データ
 ├── docs
-│   ├── schedule.md                 # ディレクトリ構成・日程など
+│   └── schedule.md                 # ディレクトリ構成・日程など
 ├── requirements.txt                # インストールするパッケージ
 ├── README.md                       # 分析に関して
 └── .gitignore
