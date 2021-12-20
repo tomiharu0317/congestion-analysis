@@ -96,7 +96,9 @@ def make_degree_dist(degree_hist, num_of_nodes):
     return degree_dist
 
 def average_degree():
-    avg_deg = sum([degree for node, degree in nx.degree(G)])
+    num_of_nodes = nx.number_of_nodes(G) 
+
+    avg_deg = round(sum([degree for node, degree in nx.degree(G)]) / num_of_nodes, 2)
 
     print(avg_deg)
 
