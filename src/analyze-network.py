@@ -6,7 +6,7 @@ import numpy as np
 G = nx.read_graphml('data/tachikawa.graphml')
 
 # network is a digraph.
-print(nx.is_directed(G))
+# print(nx.is_directed(G))
 
 # 基本特徴量---------------------------------------------
 # ノード数
@@ -63,8 +63,41 @@ def plot_degree_hist():
 
     plt.show()
 
-plot_degree_hist()
+def plot_degree_dist():
+    degree_hist = nx.degree_histogram(G)
+    
+    num_of_nodes = nx.number_of_nodes(G) 
+
+    degree_dist = make_degree_dist(degree_hist, num_of_nodes)
+
+    max_degree = len(degree_dist) - 1
+    labels = range(0, max_degree + 1)
+
+    x = np.arange(len(labels))
+    width = 0.7
+
+    fig, ax = plt.subplots()
+    rects = ax.bar(x, degree_dist, width)
+
+    ax.set_title('立川市自動車道ネットワークにおける次数分布')
+    ax.set_xlabel('次数' + r'$k$')
+    ax.set_ylabel(r'$P(k)$')
+
+    ax.bar_label(rects)
+
+    fig.tight_layout()
+
+    plt.show()
+
+def make_degree_dist(degree_hist, num_of_nodes):
+    
+    degree_dist = [round(n_k / num_of_nodes, 2) for n_k in degree_hist]
+    
+    return degree_dist
 
 
-print('number of nodes: ', num_of_nodes)
-print('number of edges: ', num_of_edges)
+# print('number of nodes: ', num_of_nodes)
+# print('number of edges: ', num_of_edges)
+# plot_degree_hist()
+plot_degree_dist()
+
