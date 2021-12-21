@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.classes.function import get_edge_attributes
 import japanize_matplotlib
 import numpy as np
 
@@ -104,8 +105,34 @@ def average_degree():
 
     # return
 
+# result : 4044.685493640773
+def average_path_length():
+
+
+    length_dict = nx.get_edge_attributes(G, name='length')
+
+    # 'length' attributesがstrなのでfloatに変換
+    for key, value in length_dict.items():
+        length_dict[key] = {'length': round(float(value), 3)}
+
+    nx.set_edge_attributes(G, length_dict)
+
+    print(nx.average_shortest_path_length(G, weight='length', method='dijkstra'))
+
+
+
+
 # print('number of nodes: ', num_of_nodes)
 # print('number of edges: ', num_of_edges)
 # plot_degree_hist()
 # plot_degree_dist()
-average_degree()
+# average_degree()
+# average_path_length()
+
+# print(dict(nx.all_pairs_dijkstra_path_length(G))[])
+# print(G.edges())
+# print(G.edges.values())
+# print(G.edges.items())
+# print(nx.is_weighted(G))
+# print(G.edges.data('length'))
+# print(nx.get_edge_attributes(G, name='length'))
