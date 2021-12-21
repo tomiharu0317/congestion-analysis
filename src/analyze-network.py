@@ -96,6 +96,7 @@ def make_degree_dist(degree_hist, num_of_nodes):
     
     return degree_dist
 
+# result : 5.12
 def average_degree():
     num_of_nodes = nx.number_of_nodes(G) 
 
@@ -105,10 +106,7 @@ def average_degree():
 
     # return
 
-# result : 4044.685493640773
-def average_path_length():
-
-
+def edge_length_str_to_float():
     length_dict = nx.get_edge_attributes(G, name='length')
 
     # 'length' attributesがstrなのでfloatに変換
@@ -117,10 +115,25 @@ def average_path_length():
 
     nx.set_edge_attributes(G, length_dict)
 
+# result : 4044.685493640773
+def average_path_length():
+
+    edge_length_str_to_float()
+
     print(nx.average_shortest_path_length(G, weight='length', method='dijkstra'))
 
+# 道路の長さで重み付けした最短距離の平均通過交差点数は
+# all_pairs_dijkstraで計算できる
+# len(path)ごとにlengthを集計して平均すれば良い
+def path_length():
 
+    edge_length_str_to_float()
 
+    shortest_path_dict = dict(nx.all_pairs_dijkstra_path(G, weight='length'))
+
+    print(shortest_path_dict["190137856"]["190137876"])
+    # path_length_dict = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
+    # print(path_length_dict["190137856"]["190137876"])
 
 # print('number of nodes: ', num_of_nodes)
 # print('number of edges: ', num_of_edges)
@@ -128,6 +141,7 @@ def average_path_length():
 # plot_degree_dist()
 # average_degree()
 # average_path_length()
+path_length()
 
 # print(dict(nx.all_pairs_dijkstra_path_length(G))[])
 # print(G.edges())
@@ -136,3 +150,6 @@ def average_path_length():
 # print(nx.is_weighted(G))
 # print(G.edges.data('length'))
 # print(nx.get_edge_attributes(G, name='length'))
+
+# sample node
+# ["190137856"]["190137876"]
