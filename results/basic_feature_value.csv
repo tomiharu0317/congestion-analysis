@@ -1,4 +1,5 @@
 name,feature_values
+is_directed,True
 num_of_nodes,4106           
 num_of_edges,10515          
 average_degree,5.12           
