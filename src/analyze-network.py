@@ -142,19 +142,89 @@ def average_path_length():
 
     average_path_length = nx.average_shortest_path_length(G, weight='length', method='dijkstra')
 
-# result : 4044.685493640773
-def average_path_length():
+    manipulatecsv.write_to_csv(key, average_path_length, filename)
 
-    edge_length_str_to_float()
+# diameter --------------------------------------------------------------------------------------
 
-    print(nx.average_shortest_path_length(G, weight='length', method='dijkstra'))
+# 全てのshortest path lengthから最大のものを取得しdiameterとする
+def retrieve_diameter():
 
+    diameter = 0
+    path = []
+
+    # shortest_path_length_dict = {
+    #     source node : {
+    #         target node: length,
+    #         target node: length
+    #     }
+    # }
+    # shortest_path_length_dict = dict(nx.shortest_path_length(G, weight='length'))
+    shortest_path_length_dict = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
+
+    # -------------------------------------------------------
+    for source_node, length_dict in list(shortest_path_length_dict.items()):
+        length_dict = dict(length_dict)
+
+        max_length = max(length_dict.values())
+
+        if diameter < max_length:
+
+            diameter = max_length
+
+            for target_node, length_to_target in length_dict.items():
+
+                if diameter == length_to_target:
+                    path = [source_node, target_node]
+
+    path = '-'.join(path)
+
+    manipulatecsv.write_to_csv('diameter', diameter, filename)
+    manipulatecsv.write_to_csv('diameter_source_target', path, filename)
+
+# [source, target] から さらに細かい path を取得 
+def retrieve_diameter_path():
+    source_target = manipulatecsv.retrieve_value_from_csv('diameter_source_target', filename).split('-')
+    
+    source_node = source_target[0]
+    target_node = source_target[1]
+
+    diameter_path = nx.dijkstra_path(G, source_node, target_node, weight='length')
+    diameter_path = '-'.join(diameter_path)
+
+    manipulatecsv.write_to_csv('diameter_path', diameter_path, filename)
+
+def plot_diameter():
+    return
+    
+
+# --------------------------------------------------------------------------------------------
+
+# mini network test --------------------------------------------------------------------------
+
+# execute function ---------------------------------------------------------------------------
+# print('number of nodes: ', num_of_nodes)
+# print('number of edges: ', num_of_edges)
+# plot_degree_hist()
+# plot_degree_dist()
+# average_degree()
+# average_path_length()
+# path_length()
+# retrieve_diameter()
+# retrieve_diameter_path()
+# plot_diameter()
+
+
+# --------------------------------------------------------------------------------------------
+
+# other feature values -----------------------------------------------------------------------
+
+# edge length distribution ----------------------------------------------------------------
+
+# FIXME
 # 道路の長さで重み付けした最短距離の平均通過交差点数は
 # all_pairs_dijkstraで計算できる
 # len(path)ごとにlengthを集計して平均すれば良い
 def path_length():
-
-    edge_length_str_to_float()
 
     shortest_path_dict = dict(nx.all_pairs_dijkstra_path(G, weight='length'))
 
@@ -162,21 +232,62 @@ def path_length():
     # path_length_dict = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
     # print(path_length_dict["190137856"]["190137876"])
 
-# print('number of nodes: ', num_of_nodes)
-# print('number of edges: ', num_of_edges)
-# plot_degree_hist()
-# plot_degree_dist()
-# average_degree()
-# average_path_length()
-path_length()
 
-# print(dict(nx.all_pairs_dijkstra_path_length(G))[])
-# print(G.edges())
-# print(G.edges.values())
-# print(G.edges.items())
-# print(nx.is_weighted(G))
-# print(G.edges.data('length'))
-# print(nx.get_edge_attributes(G, name='length'))
+# retrieve diameter method2-----------------------------------------------------------------
 
-# sample node
-# ["190137856"]["190137876"]
+# TODO: diameterの値を持つshorest pathを取得する
+def retrieve_diameter_path_2():
+
+    length_key = 'diameter'
+    path_key = 'diameter_path'
+
+    # diameter = float(manipulatecsv.retrieve_value_from_csv('diameter', filename))
+    diameter = float(0)
+    diameter_path = []
+
+        # all_pairs_shortest_path_length_dict = {
+    #     "source node1": (
+    #         {
+    #             "target node": length from source node to target node,
+    #         }, 
+    #         {
+    #                             # path to target node
+    #             "target node": [node1, node2, node3],
+    #         }
+    # ),
+    # }
+    all_pairs_shortest_path_length_dict = dict(nx.all_pairs_dijkstra(G, weight='length'))
+
+    # n: num_of_nodes = 4106
+    n = len(all_pairs_shortest_path_length_dict)
+
+    value_list = list(all_pairs_shortest_path_length_dict.values())
+
+    # FIXME: 別のやり方として、max_lengthを取得し、そのvalueを持つkey:pathを取得
+
+    # value_list[n]: node n の tuple({length}, {path})
+    # value_list[n][0] : node n から各 target node への length dict
+    # value_list[n][1] : node n から各 target node への path dict
+    for source_node_i in range(n):
+        length_list = list(value_list[source_node_i][0].values())
+        path_list = list(value_list[source_node_i][1].values())
+
+        for target_node_j in range(n):
+            # print(float(length_list[target_node_j]))
+            length_to_target_node = float(length_list[target_node_j])
+
+            if length_to_target_node > diameter:
+            # if float(length_list[target_node_j]) == diameter:
+                diameter = length_to_target_node
+                diameter_path = path_list[target_node_j]
+
+                print(diameter)
+                print(diameter_path)
+
+                break
+        break
+
+    manipulatecsv.write_to_csv(length_key, diameter, filename)
+    manipulatecsv.write_to_csv(path_key, diameter_path, filename)
+
+# ----------------------------------------------------------------------------------------------
