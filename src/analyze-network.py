@@ -193,6 +193,7 @@ def retrieve_diameter_path():
 
     manipulatecsv.write_to_csv('diameter_path', diameter_path, filename)
 
+# TODO: ノードをつなぐエッジに色を与えてプロットする
 def plot_diameter():
     return
     
