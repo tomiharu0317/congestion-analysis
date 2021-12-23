@@ -4,3 +4,4 @@ networkx
 numpy
 pandas
 matplotlib
+japanize-matplotlib
