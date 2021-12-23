@@ -1,13 +1,31 @@
+import csv
+import re
+from os import path
 import networkx as nx
-import matplotlib.pyplot as plt
-from networkx.classes.function import get_edge_attributes
-import japanize_matplotlib
+from networkx.algorithms.assortativity import pairs
+from networkx.algorithms.distance_measures import diameter
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import japanize_matplotlib
+import manipulatecsv
+
+# sample node
+# ["190137856"]["190137876"]
 
 G = nx.read_graphml('data/tachikawa.graphml')
+filename = 'results/basic_feature_value.csv'
 
-# network is a digraph.
-# print(nx.is_directed(G))
+def edge_length_str_to_float():
+    length_dict = nx.get_edge_attributes(G, name='length')
+
+    # 'length' attributesがstrなのでfloatに変換
+    for key, value in length_dict.items():
+        length_dict[key] = {'length': round(float(value), 3)}
+
+    nx.set_edge_attributes(G, length_dict)
+
+edge_length_str_to_float()
 
 # 基本特徴量---------------------------------------------
 # ノード数
@@ -27,18 +45,25 @@ G = nx.read_graphml('data/tachikawa.graphml')
 # 近接中心性
 # -----------------------------------------------------
 
-# type(nx.nodes(G)) :
-# <class 'networkx.classes.reportviews.NodeView'>
-node_list = list(nx.nodes(G))
+def is_digraph():
+    key = 'is_directed'
+    value = nx.is_directed(G)
+    manipulatecsv.write_to_csv(key, value, filename) 
 
 # number of nodes : 4106
-num_of_nodes = nx.number_of_nodes(G) 
+def num_of_nodes():
+    key = 'num_of_nodes'
+    value = nx.number_of_nodes(G)
+    manipulatecsv.write_to_csv(key, value, filename) 
 
+# TODO: 一方通行を含む有向グラフに対してどのように計算しているか確認
 # number of edges : 10515
-num_of_edges = nx.number_of_edges(G)
+def num_of_edges():
+    key = 'num_of_edges'
+    value = nx.number_of_edges(G)
+    manipulatecsv.write_to_csv(key, value, filename)
 
-# degree histgram
-degree_list = nx.degree(G)
+# degree histgram ------------------------------------------------------------------------
 
 # A list of frequencies of degrees.
 # The degree values are the index in the list. : 
@@ -61,15 +86,13 @@ def plot_degree_hist():
     ax.bar_label(rects)
 
     fig.tight_layout()
+    fig.savefig('results/images/degree_hist.jpg')
 
-    plt.show()
+# degree distribution --------------------------------------------------------------------
 
 def plot_degree_dist():
-    degree_hist = nx.degree_histogram(G)
-    
-    num_of_nodes = nx.number_of_nodes(G) 
 
-    degree_dist = make_degree_dist(degree_hist, num_of_nodes)
+    degree_dist = make_degree_dist()
 
     max_degree = len(degree_dist) - 1
     labels = range(0, max_degree + 1)
@@ -87,33 +110,37 @@ def plot_degree_dist():
     ax.bar_label(rects)
 
     fig.tight_layout()
+    fig.savefig('results/images/degree_dist.jpg')
 
-    plt.show()
 
-def make_degree_dist(degree_hist, num_of_nodes):
+def make_degree_dist():
+    degree_hist = nx.degree_histogram(G)
+    num_of_nodes = nx.number_of_nodes(G) 
     
     degree_dist = [round(n_k / num_of_nodes, 2) for n_k in degree_hist]
     
     return degree_dist
 
+# average degree ---------------------------------------------------------------------------
+
 # result : 5.12
 def average_degree():
+    key = 'average_degree'
+
     num_of_nodes = nx.number_of_nodes(G) 
 
     avg_deg = round(sum([degree for node, degree in nx.degree(G)]) / num_of_nodes, 2)
 
-    print(avg_deg)
+    manipulatecsv.write_to_csv(key, avg_deg, filename)
 
-    # return
+# average path length ------------------------------------------------------------------------
 
-def edge_length_str_to_float():
-    length_dict = nx.get_edge_attributes(G, name='length')
+# result : 4044.685493640773
+def average_path_length():
 
-    # 'length' attributesがstrなのでfloatに変換
-    for key, value in length_dict.items():
-        length_dict[key] = {'length': round(float(value), 3)}
+    key = 'average_path_length'
 
-    nx.set_edge_attributes(G, length_dict)
+    average_path_length = nx.average_shortest_path_length(G, weight='length', method='dijkstra')
 
 # result : 4044.685493640773
 def average_path_length():
