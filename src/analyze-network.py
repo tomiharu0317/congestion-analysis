@@ -2,6 +2,7 @@ import csv
 import re
 from os import path
 import networkx as nx
+from networkx.algorithms import cluster
 from networkx.algorithms.assortativity import pairs
 from networkx.algorithms.distance_measures import diameter
 from networkx.classes.function import density
@@ -205,14 +206,29 @@ def calc_density():
 
     manipulatecsv.write_to_csv(key, density_val, filename)
 
-# TODO
 # cluster coefficient-------------------------------------------------------------------------
+def calc_cluster_coefficient():
+    key = 'cluster_coefficient'
+    cluster_coefficient = nx.clustering(G, weight='length')
 
 
-
-# TODO
+# MultiDiGraphでは計算できないのでDiGraphに変換
+# MultiDiGraph edge num: 10515
+# DiGraph      edge num: 10441 
 # average cluster coefficient-----------------------------------------------------------------
+def calc_avg_cluster_coefficient():
+    key = 'average_cluster_coefficient'
 
+    G2 = nx.DiGraph(G)
+
+    # G2_edges = set(G2.edges())
+    # for edge in set(G.edges()):
+    #     if edge not in G2_edges:
+    #         print(edge)
+
+    avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'),5)
+
+    manipulatecsv.write_to_csv(key, avg_cluster_coefficient, filename)
 
 # --------------------------------------------------------------------------------------------
 
@@ -229,7 +245,9 @@ def calc_density():
 # retrieve_diameter()
 # retrieve_diameter_path()
 # plot_diameter()
-calc_density()
+# calc_density()
+# calc_cluster_coefficient()
+calc_avg_cluster_coefficient()
 
 
 # --------------------------------------------------------------------------------------------
