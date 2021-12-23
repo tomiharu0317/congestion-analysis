@@ -4,6 +4,7 @@ from os import path
 import networkx as nx
 from networkx.algorithms.assortativity import pairs
 from networkx.algorithms.distance_measures import diameter
+from networkx.classes.function import density
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -197,6 +198,21 @@ def retrieve_diameter_path():
 def plot_diameter():
     return
     
+# density ------------------------------------------------------------------------------------
+def calc_density():
+    key = 'density'
+    density_val = round(nx.density(G), 6)
+
+    manipulatecsv.write_to_csv(key, density_val, filename)
+
+# TODO
+# cluster coefficient-------------------------------------------------------------------------
+
+
+
+# TODO
+# average cluster coefficient-----------------------------------------------------------------
+
 
 # --------------------------------------------------------------------------------------------
 
@@ -213,6 +229,7 @@ def plot_diameter():
 # retrieve_diameter()
 # retrieve_diameter_path()
 # plot_diameter()
+calc_density()
 
 
 # --------------------------------------------------------------------------------------------
