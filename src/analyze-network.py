@@ -4,7 +4,10 @@ from os import path
 import networkx as nx
 from networkx.algorithms import cluster
 from networkx.algorithms.assortativity import pairs
+from networkx.algorithms.centrality.degree_alg import in_degree_centrality
+from networkx.algorithms.centrality.eigenvector import eigenvector_centrality
 from networkx.algorithms.distance_measures import diameter
+from networkx.algorithms.shortest_paths import weighted
 from networkx.classes.function import density
 import numpy as np
 import pandas as pd
@@ -230,6 +233,53 @@ def calc_avg_cluster_coefficient():
 
     manipulatecsv.write_to_csv(key, avg_cluster_coefficient, filename)
 
+# degree centrality --------------------------------------------------------------------------
+# TODO: 値をもとにプロット
+def calc_in_degree_centrality():
+    key = 'in_degree_centrality'
+
+    in_degree_centrality_dict = nx.in_degree_centrality(G)
+
+# TODO: 値をもとにプロット
+def calc_out_degree_centrality():
+    key = 'out_degree_centrality'
+
+    in_degree_centrality_dict = nx.out_degree_centrality(G)
+
+# eigenvector centrality ---------------------------------------------------------------------
+# TODO: 値をもとにプロット
+def calc_eigenvector_centrality():
+    key = 'eigenvector_centrality'
+
+    G2 = nx.DiGraph(G)
+
+    eigenvector_centrality_dict = nx.eigenvector_centrality(G2, max_iter=5000, weight='length')
+
+# betweenness centrality ---------------------------------------------------------------------
+# TODO: 値をもとにプロット
+def calc_betweenness_centrality():
+    key = 'betweenness_centrality'
+
+    G2 = nx.DiGraph(G)
+
+    betweenness_centrality_dict = nx.betweenness_centrality(G2, weight='length')
+
+# closeness centrality -----------------------------------------------------------------------
+# TODO: 値をもとにプロット
+def calc_closeness_centrality():
+    key = 'closeness_centrality'
+
+    closeness_centrality_dict = nx.closeness_centrality(G, distance='length')
+
+# pagerank -----------------------------------------------------------------------------------
+# TODO: 値をもとにプロット
+def calc_pagerank():
+    key = 'pagerank'
+
+    pagerank_dict = nx.pagerank(G, weight='length')
+
+    print(pagerank_dict.values())
+
 # --------------------------------------------------------------------------------------------
 
 # mini network test --------------------------------------------------------------------------
@@ -247,7 +297,14 @@ def calc_avg_cluster_coefficient():
 # plot_diameter()
 # calc_density()
 # calc_cluster_coefficient()
-calc_avg_cluster_coefficient()
+# calc_avg_cluster_coefficient()
+# calc_in_degree_centrality()
+# calc_out_degree_centrality()
+# calc_eigenvector_centrality()
+# calc_betweenness_centrality()
+# calc_closeness_centrality()
+calc_pagerank()
+
 
 
 # --------------------------------------------------------------------------------------------
