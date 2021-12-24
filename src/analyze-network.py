@@ -8,7 +8,7 @@ from networkx.algorithms.centrality.degree_alg import in_degree_centrality
 from networkx.algorithms.centrality.eigenvector import eigenvector_centrality
 from networkx.algorithms.distance_measures import diameter
 from networkx.algorithms.shortest_paths import weighted
-from networkx.classes.function import density
+from networkx.classes.function import density, edges
 from networkx.readwrite.graph6 import data_to_n
 import numpy as np
 import pandas as pd
@@ -235,6 +235,10 @@ def calc_avg_cluster_coefficient():
 
     manipulatecsv.write_to_csv(key, avg_cluster_coefficient, filename)
 
+# TODO: write centrality for each nodes to csv 
+#       and get ready for Regression
+# centrality ---------------------------------------------------------------------------------
+
 # degree centrality --------------------------------------------------------------------------
 # TODO: 値をもとにプロット
 def calc_in_degree_centrality():
@@ -285,14 +289,24 @@ def calc_pagerank():
 # plot centrality using plotly----------------------------------------------------------------
 def plot_centrality():
 
+    return
+
+# plot road network---------------------------------------------------------------------------
+def retrieve_coordinate(node, node_data_dict):
+
+    x = float(node_data_dict[node]['x'])
+    y = float(node_data_dict[node]['y'])
+
+    return [x,y]
+
+def make_nodes_for_plotly(node_data_dict):
+
     node_x = []
     node_y = []
 
-    data_dict = dict(G.nodes.data())
-
-    for node, data in data_dict.items():
-        node_x.append(float(data_dict[node]['x'])) 
-        node_y.append(float(data_dict[node]['y']))
+    for node, data in node_data_dict.items():
+        node_x.append(retrieve_coordinate(node, node_data_dict)[0]) 
+        node_y.append(retrieve_coordinate(node, node_data_dict)[1])
 
     nodes = go.Scatter(
         x=node_x,
@@ -301,7 +315,53 @@ def plot_centrality():
         marker=dict(size=1, line=dict(width=0.5))
     )
 
-    fig = go.Figure(data=[nodes])
+    return nodes
+
+def make_edges_for_plotly(node_data_dict):
+
+    edge_x = []
+    edge_y = []
+
+    edge_list = list(G.edges())
+
+    for edge in edge_list:
+
+        source = edge[0]
+        target = edge[1]
+
+        source_coordinate = retrieve_coordinate(source, node_data_dict)
+        target_coordinate = retrieve_coordinate(target, node_data_dict)
+
+        # source node coordinate
+        edge_x.append(source_coordinate[0])
+        edge_y.append(source_coordinate[1])
+
+        # target node coordinate
+        edge_x.append(target_coordinate[0])
+        edge_y.append(target_coordinate[1])
+        
+        # edge delimiter
+        edge_x.append(None)
+        edge_y.append(None)
+
+    edges = go.Scatter(
+        x = edge_x,
+        y = edge_y,
+        mode = 'lines',
+        line = dict(width = 2)
+    )
+
+    return edges
+
+# plot road network using plotly
+def plot_road_network():
+
+    node_data_dict = dict(G.nodes.data())
+
+    nodes_for_plotly = make_nodes_for_plotly(node_data_dict)
+    edges_for_plotly = make_edges_for_plotly(node_data_dict)
+
+    fig = go.Figure(data=[nodes_for_plotly, edges_for_plotly])
     fig.write_html('results/images/html/tachikawa.html', auto_open=True)
 
 # --------------------------------------------------------------------------------------------
@@ -328,8 +388,8 @@ def plot_centrality():
 # calc_betweenness_centrality()
 # calc_closeness_centrality()
 # calc_pagerank()
-plot_centrality()
-
+# plot_centrality()
+plot_road_network()
 
 
 # --------------------------------------------------------------------------------------------
