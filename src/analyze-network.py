@@ -9,10 +9,12 @@ from networkx.algorithms.centrality.eigenvector import eigenvector_centrality
 from networkx.algorithms.distance_measures import diameter
 from networkx.algorithms.shortest_paths import weighted
 from networkx.classes.function import density
+from networkx.readwrite.graph6 import data_to_n
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import japanize_matplotlib
+import plotly.graph_objects as go
 import manipulatecsv
 
 # sample node
@@ -280,6 +282,28 @@ def calc_pagerank():
 
     print(pagerank_dict.values())
 
+# plot centrality using plotly----------------------------------------------------------------
+def plot_centrality():
+
+    node_x = []
+    node_y = []
+
+    data_dict = dict(G.nodes.data())
+
+    for node, data in data_dict.items():
+        node_x.append(float(data_dict[node]['x'])) 
+        node_y.append(float(data_dict[node]['y']))
+
+    nodes = go.Scatter(
+        x=node_x,
+        y=node_y,
+        mode='markers',
+        marker=dict(size=1, line=dict(width=0.5))
+    )
+
+    fig = go.Figure(data=[nodes])
+    fig.write_html('results/images/html/tachikawa.html', auto_open=True)
+
 # --------------------------------------------------------------------------------------------
 
 # mini network test --------------------------------------------------------------------------
@@ -303,11 +327,21 @@ def calc_pagerank():
 # calc_eigenvector_centrality()
 # calc_betweenness_centrality()
 # calc_closeness_centrality()
-calc_pagerank()
+# calc_pagerank()
+plot_centrality()
 
 
 
 # --------------------------------------------------------------------------------------------
+
+# retrieve attiributes from node/edge data
+def retrieve_attributes_from_data():
+    data_dict = dict(G.nodes.data())
+    pos = {}
+
+    for node, data in data_dict.items():
+        pos[node] = (float(data_dict[node]['x']), float(data_dict[node]['y']))
+
 
 # other feature values -----------------------------------------------------------------------
 
