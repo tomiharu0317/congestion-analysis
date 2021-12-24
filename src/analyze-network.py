@@ -9,6 +9,7 @@ from networkx.algorithms.centrality.eigenvector import eigenvector_centrality
 from networkx.algorithms.distance_measures import diameter
 from networkx.algorithms.shortest_paths import weighted
 from networkx.classes.function import density, edges
+from networkx.drawing import layout
 from networkx.readwrite.graph6 import data_to_n
 import numpy as np
 import pandas as pd
@@ -286,6 +287,7 @@ def calc_pagerank():
 
     print(pagerank_dict.values())
 
+# TODO: edgeのopacityを高めてnodeのcontinuous color scaleを実現
 # plot centrality using plotly----------------------------------------------------------------
 def plot_centrality():
 
@@ -312,7 +314,7 @@ def make_nodes_for_plotly(node_data_dict):
         x=node_x,
         y=node_y,
         mode='markers',
-        marker=dict(size=1, line=dict(width=0.5))
+        marker=dict(size=3, line=dict(width=1, color='red'))
     )
 
     return nodes
@@ -348,7 +350,7 @@ def make_edges_for_plotly(node_data_dict):
         x = edge_x,
         y = edge_y,
         mode = 'lines',
-        line = dict(width = 2)
+        line = dict(width = 1, color='gray')
     )
 
     return edges
@@ -361,7 +363,22 @@ def plot_road_network():
     nodes_for_plotly = make_nodes_for_plotly(node_data_dict)
     edges_for_plotly = make_edges_for_plotly(node_data_dict)
 
-    fig = go.Figure(data=[nodes_for_plotly, edges_for_plotly])
+    # plotly Figure params
+    data = [nodes_for_plotly, edges_for_plotly]
+    layout = go.Layout(
+        # title = dict(
+        #     text = '<b>Road Network in Tachikawa',
+        #     font = dict(size=26, color='gray'),
+        # ),
+        showlegend=False,
+        xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
+        yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
+        plot_bgcolor='white',
+        width=800,
+        height=600
+    )
+
+    fig = go.Figure(data, layout)
     fig.write_html('results/images/html/tachikawa.html', auto_open=True)
 
 # --------------------------------------------------------------------------------------------
@@ -389,7 +406,7 @@ def plot_road_network():
 # calc_closeness_centrality()
 # calc_pagerank()
 # plot_centrality()
-plot_road_network()
+# plot_road_network()
 
 
 # --------------------------------------------------------------------------------------------
