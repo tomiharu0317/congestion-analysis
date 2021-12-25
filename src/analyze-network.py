@@ -204,8 +204,53 @@ def retrieve_diameter_path():
     manipulatecsv.write_to_csv('diameter_path', diameter_path, filename)
 
 # TODO: ノードをつなぐエッジに色を与えてプロットする
+def make_diameter_nodes_for_plotly(diameter_path_list, node_data_dict):
+
+    node_x = []
+    node_y = []
+
+    for node in diameter_path_list:
+        node_x.append(retrieve_coordinate(node, node_data_dict)[0]) 
+        node_y.append(retrieve_coordinate(node, node_data_dict)[1])
+
+    nodes = go.Scatter(
+        x=node_x,
+        y=node_y,
+        mode='markers',
+        marker=dict(size=6, color='red')
+    )
+
+    return nodes
+
 def plot_diameter():
-    return
+
+    node_data_dict = dict(G.nodes.data())
+
+    diameter_path = manipulatecsv.retrieve_value_from_csv('diameter_path', filename)
+    diameter_path_list = diameter_path.split('-')
+
+    diameter_nodes_for_plotly = make_diameter_nodes_for_plotly(diameter_path_list, node_data_dict)
+
+    # nodes_for_plotly = make_nodes_for_plotly(node_data_dict)
+    edges_for_plotly = make_edges_for_plotly(node_data_dict)
+
+    # plotly Figure params
+    data = [edges_for_plotly, diameter_nodes_for_plotly]
+    layout = go.Layout(
+        title = dict(
+            text = 'diameter path',
+            font = dict(size=20, color='gray'),
+        ),
+        showlegend=False,
+        xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
+        yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
+        plot_bgcolor='white',
+        width=800,
+        height=600
+    )
+
+    fig = go.Figure(data, layout)
+    fig.write_html('results/images/html/diameter.html', auto_open=True)
     
 # density ------------------------------------------------------------------------------------
 def calc_density():
@@ -500,7 +545,7 @@ def plot_road_network():
 # path_length()
 # retrieve_diameter()
 # retrieve_diameter_path()
-# plot_diameter()
+plot_diameter()
 # calc_density()
 # calc_cluster_coefficient()
 # calc_avg_cluster_coefficient()
