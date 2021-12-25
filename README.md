@@ -6,6 +6,8 @@
 
 ### 道路ネットワーク
 
+![road_network_in_tachikawa](results/images/tachikawa_plotly.png)
+
 - Open Street Map から取得した立川市道路ネットワーク
 - `source`から`target`への向きをもつ edge が定義された`Digraph`
 - 2 つの node 間に 2 つの edge を持つ場合がある`MultiDigraph`
@@ -59,10 +61,10 @@
 
 ## 分析方法
 
-1. 道路ネットワークの可視化 (ノード：交差点)
-2. ネットワークの基本特徴量を算出
-3. 中心性指標に基づいてグラデーションで色付けしプロット
-4. 交通量をエッジに重み付けし、重みを可視化に反映
+1. 道路ネットワークの可視化 (ノード：交差点) [x]
+2. ネットワークの基本特徴量を算出 [x]
+3. 中心性指標に基づいてグラデーションで色付けしプロット [x]
+4. 交通量をエッジに重み付けし、重みを可視化に反映 [ ]
 
 #### 基本特徴量
 
@@ -101,3 +103,44 @@ $ python3 fetch-road-network.py
 ```
 
 ## 結果
+
+### 基本特徴量
+
+| 名前               | 値        |
+| ------------------ | --------- |
+| 有向グラフ         | True      |
+| ノード数           | 4106      |
+| エッジ数           | 10515     |
+| 平均次数           | 5.12      |
+| 平均経路長         | 4044.685  |
+| 直径               | 10418.409 |
+| 密度               | 0.000624  |
+| 平均クラスター係数 | 0.00188   |
+
+### 中心性指標に基づくプロット
+
+スタージェスの公式に基づいて中心性の値の階級数を決め、値が高いものから`class 1`として濃い色でプロットした.
+
+#### 次数中心性
+
+**入次数**
+![in_degree_centrality](results/images/in_degree_centrality.png)
+
+**出次数**
+![out_degree_centrality](results/images/out_degree_centrality.png)
+
+#### 固有値中心性
+
+![eigenvector_centrality](results/images/eigenvector_centrality.png)
+
+#### 媒介中心性
+
+![betweenness_centrality](results/images/betweenness_centrality.png)
+
+#### 近接中心性
+
+![closeness_centrality](results/images/closeness_centrality.png)
+
+#### ページランク
+
+![pagerank](results/images/pagerank.png)
