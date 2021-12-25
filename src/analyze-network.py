@@ -1,5 +1,6 @@
 import csv
 import re
+import math
 from os import path
 import networkx as nx
 from networkx.algorithms import cluster
@@ -16,6 +17,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import japanize_matplotlib
 import plotly.graph_objects as go
+import plotly.express as px
 import manipulatecsv
 
 # sample node
@@ -41,9 +43,8 @@ edge_length_str_to_float()
 # 次数のヒストグラム
 # 次数分布
 # 平均次数
-# 平均ノード間距離
-# ノード間距離の分布
-# ネットワークの直径
+# 平均ノード間距離(道路の長さが距離)
+# ネットワークの直径(shortest path length の中で最大のもの)
 # エッジ密度
 # クラスター係数
 # 平均クラスター係数
@@ -51,6 +52,7 @@ edge_length_str_to_float()
 # 固有値中心性
 # 媒介中心性
 # 近接中心性
+# ページランク
 # -----------------------------------------------------
 
 def is_digraph():
@@ -236,62 +238,163 @@ def calc_avg_cluster_coefficient():
 
     manipulatecsv.write_to_csv(key, avg_cluster_coefficient, filename)
 
+# TODO: クラスにしてplot, save as csvで機能分離
 # TODO: write centrality for each nodes to csv 
 #       and get ready for Regression
 # centrality ---------------------------------------------------------------------------------
-
 # degree centrality --------------------------------------------------------------------------
-# TODO: 値をもとにプロット
-def calc_in_degree_centrality():
+def plot_in_degree_centrality():
     key = 'in_degree_centrality'
 
     in_degree_centrality_dict = nx.in_degree_centrality(G)
 
-# TODO: 値をもとにプロット
-def calc_out_degree_centrality():
+    plot_centrality(in_degree_centrality_dict, key)
+
+def plot_out_degree_centrality():
     key = 'out_degree_centrality'
 
-    in_degree_centrality_dict = nx.out_degree_centrality(G)
+    out_degree_centrality_dict = nx.out_degree_centrality(G)
+
+    plot_centrality(out_degree_centrality_dict, key)
 
 # eigenvector centrality ---------------------------------------------------------------------
-# TODO: 値をもとにプロット
-def calc_eigenvector_centrality():
+def plot_eigenvector_centrality():
     key = 'eigenvector_centrality'
 
     G2 = nx.DiGraph(G)
 
     eigenvector_centrality_dict = nx.eigenvector_centrality(G2, max_iter=5000, weight='length')
 
+    plot_centrality(eigenvector_centrality_dict, key)
+
 # betweenness centrality ---------------------------------------------------------------------
-# TODO: 値をもとにプロット
-def calc_betweenness_centrality():
+def plot_betweenness_centrality():
     key = 'betweenness_centrality'
 
     G2 = nx.DiGraph(G)
 
     betweenness_centrality_dict = nx.betweenness_centrality(G2, weight='length')
 
+    plot_centrality(betweenness_centrality_dict, key)
+
 # closeness centrality -----------------------------------------------------------------------
-# TODO: 値をもとにプロット
-def calc_closeness_centrality():
+def plot_closeness_centrality():
     key = 'closeness_centrality'
 
     closeness_centrality_dict = nx.closeness_centrality(G, distance='length')
 
+    plot_centrality(closeness_centrality_dict, key)
+
 # pagerank -----------------------------------------------------------------------------------
-# TODO: 値をもとにプロット
-def calc_pagerank():
+def plot_pagerank():
     key = 'pagerank'
 
     pagerank_dict = nx.pagerank(G, weight='length')
 
-    print(pagerank_dict.values())
+    plot_centrality(pagerank_dict, key)
 
-# TODO: edgeのopacityを高めてnodeのcontinuous color scaleを実現
+# 値の階級値を決め、それごとにnodes = go.Scatter()で別の色を与えていく
 # plot centrality using plotly----------------------------------------------------------------
-def plot_centrality():
+def sturges_rule(centrality_dict):
 
-    return
+    centrality_dict = np.asarray(list(centrality_dict.values()))
+
+    # スタージェスの公式から階級の数を求める
+    class_size = int(np.log2(centrality_dict.size).round()) + 1
+
+    return class_size
+
+def set_color(index):
+
+    # color_list = px.colors.sequential.Mint
+    # color_list = px.colors.sequential.Plotly3
+    # color_list = px.colors.sequential.Teal
+    # color_list = ['#0508b8', '#1910d8', '#3c19f0', '#6b1cfb', '#981cfd', '#bf1cfd', '#dd2bfd', '#f246fe', '#fc67fd', '#fe88fc', '#fea5fd', '#febefe', '#fec3fe']
+    color_list = ['rgb(247,251,255)', 'rgb(222,235,247)', 'rgb(198,219,239)', 'rgb(158,202,225)', 'rgb(107,174,214)', 'rgb(66,146,198)', 'rgb(33,113,181)', 'rgb(8,81,156)', 'rgb(8,48,107)']
+
+    color_list.reverse()
+
+    n = len(color_list)
+
+    if index < n:
+        color = color_list[index]
+    else:
+        color = color_list[-1]
+
+    return color
+
+def make_different_color_nodes_for_plotly(node_list, node_data_dict, plotly_data, color, index):
+
+    node_x = []
+    node_y = []
+
+    for node in node_list:
+        node = node[0]
+        node_x.append(retrieve_coordinate(node, node_data_dict)[0])
+        node_y.append(retrieve_coordinate(node, node_data_dict)[1])
+
+    nodes = go.Scatter(
+        x=node_x,
+        y=node_y,
+        mode='markers',
+        marker=dict(size=5,  color=color),
+        name='class' + str(index + 1)
+    )
+
+    plotly_data.append(nodes)
+
+    return plotly_data
+
+def plot_centrality(centrality_dict, key):
+
+    node_data_dict = dict(G.nodes.data())
+    edges_for_plotly = make_edges_for_plotly(node_data_dict)
+    plotly_data = [edges_for_plotly]
+
+    # centralityの値に基づいて降順にソート
+    centrality_dict_sorted = sorted(centrality_dict.items(), key=lambda x:x[1], reverse=True)
+
+    # 中心性の値の階級の数をスタージェスの公式から求める
+    class_size = sturges_rule(centrality_dict)
+
+    # 階級ごとにノードを分け、異なる色を付与してplotly_dataに加える
+    num_of_nodes = len(centrality_dict_sorted)
+    split_size = math.floor(num_of_nodes / class_size)
+
+    for i in range(class_size):
+
+        # 階級値は切り捨ててあるので、最後のカテゴリーが11 nodes多くなる
+        if i != (class_size - 1):
+            start = i * split_size
+            stop = (i + 1) * split_size
+
+            # node_list = [('node_ID', centrality_val), (), () ...]
+            node_list = centrality_dict_sorted[start:stop]
+        else:
+            start = i * split_size
+            node_list = centrality_dict_sorted[start:]
+
+        color = set_color(i)
+        plotly_data = make_different_color_nodes_for_plotly(node_list, node_data_dict, plotly_data, color, i)
+
+
+    # plotly Figure params
+    layout = go.Layout(
+        title = dict(
+            text = key,
+            font = dict(size=20, color='gray'),
+        ),
+        # showlegend=False,
+        xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
+        yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
+        plot_bgcolor='white',
+        width=800,
+        height=600
+    )
+
+    filename = 'results/images/html/' + key + '.html'
+    fig = go.Figure(plotly_data, layout)
+    fig.write_html(filename, auto_open=True)
 
 # plot road network---------------------------------------------------------------------------
 def retrieve_coordinate(node, node_data_dict):
@@ -350,7 +453,9 @@ def make_edges_for_plotly(node_data_dict):
         x = edge_x,
         y = edge_y,
         mode = 'lines',
-        line = dict(width = 1, color='gray')
+        opacity = 0.7,
+        line = dict(width = 1, color='gray'),
+        showlegend=False
     )
 
     return edges
@@ -364,12 +469,12 @@ def plot_road_network():
     edges_for_plotly = make_edges_for_plotly(node_data_dict)
 
     # plotly Figure params
-    data = [nodes_for_plotly, edges_for_plotly]
+    data = [edges_for_plotly, nodes_for_plotly]
     layout = go.Layout(
-        # title = dict(
-        #     text = '<b>Road Network in Tachikawa',
-        #     font = dict(size=26, color='gray'),
-        # ),
+        title = dict(
+            text = 'Road Network in Tachikawa',
+            font = dict(size=20, color='gray'),
+        ),
         showlegend=False,
         xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
         yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
@@ -399,13 +504,12 @@ def plot_road_network():
 # calc_density()
 # calc_cluster_coefficient()
 # calc_avg_cluster_coefficient()
-# calc_in_degree_centrality()
-# calc_out_degree_centrality()
-# calc_eigenvector_centrality()
-# calc_betweenness_centrality()
-# calc_closeness_centrality()
-# calc_pagerank()
-# plot_centrality()
+# plot_in_degree_centrality()
+# plot_out_degree_centrality()
+# plot_eigenvector_centrality()
+# plot_betweenness_centrality()
+# plot_closeness_centrality()
+# plot_pagerank()
 # plot_road_network()
 
 
@@ -435,63 +539,5 @@ def path_length():
     print(shortest_path_dict["190137856"]["190137876"])
     # path_length_dict = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
     # print(path_length_dict["190137856"]["190137876"])
-
-
-# retrieve diameter method2-----------------------------------------------------------------
-
-# TODO: diameterの値を持つshorest pathを取得する
-def retrieve_diameter_path_2():
-
-    length_key = 'diameter'
-    path_key = 'diameter_path'
-
-    # diameter = float(manipulatecsv.retrieve_value_from_csv('diameter', filename))
-    diameter = float(0)
-    diameter_path = []
-
-        # all_pairs_shortest_path_length_dict = {
-    #     "source node1": (
-    #         {
-    #             "target node": length from source node to target node,
-    #         }, 
-    #         {
-    #                             # path to target node
-    #             "target node": [node1, node2, node3],
-    #         }
-    # ),
-    # }
-    all_pairs_shortest_path_length_dict = dict(nx.all_pairs_dijkstra(G, weight='length'))
-
-    # n: num_of_nodes = 4106
-    n = len(all_pairs_shortest_path_length_dict)
-
-    value_list = list(all_pairs_shortest_path_length_dict.values())
-
-    # FIXME: 別のやり方として、max_lengthを取得し、そのvalueを持つkey:pathを取得
-
-    # value_list[n]: node n の tuple({length}, {path})
-    # value_list[n][0] : node n から各 target node への length dict
-    # value_list[n][1] : node n から各 target node への path dict
-    for source_node_i in range(n):
-        length_list = list(value_list[source_node_i][0].values())
-        path_list = list(value_list[source_node_i][1].values())
-
-        for target_node_j in range(n):
-            # print(float(length_list[target_node_j]))
-            length_to_target_node = float(length_list[target_node_j])
-
-            if length_to_target_node > diameter:
-            # if float(length_list[target_node_j]) == diameter:
-                diameter = length_to_target_node
-                diameter_path = path_list[target_node_j]
-
-                print(diameter)
-                print(diameter_path)
-
-                break
-        break
-
-    manipulatecsv.write_to_csv(length_key, diameter, filename)
-    manipulatecsv.write_to_csv(path_key, diameter_path, filename)
 
 # ----------------------------------------------------------------------------------------------
