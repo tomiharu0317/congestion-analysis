@@ -15,3 +15,9 @@ def retrieve_value_from_csv(key, filename):
                 value = row[1]
 
     return value
+
+def write_header_to_csv(header_list, filename):
+    
+    with open(filename, 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(header_list)

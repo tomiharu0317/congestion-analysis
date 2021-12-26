@@ -66,7 +66,6 @@ def num_of_nodes():
     value = nx.number_of_nodes(G)
     manipulatecsv.write_to_csv(key, value, filename) 
 
-# TODO: 一方通行を含む有向グラフに対してどのように計算しているか確認
 # number of edges : 10515
 def num_of_edges():
     key = 'num_of_edges'
@@ -203,7 +202,6 @@ def retrieve_diameter_path():
 
     manipulatecsv.write_to_csv('diameter_path', diameter_path, filename)
 
-# TODO: ノードをつなぐエッジに色を与えてプロットする
 def make_diameter_nodes_for_plotly(diameter_path_list, node_data_dict):
 
     node_x = []
@@ -282,255 +280,6 @@ def calc_avg_cluster_coefficient():
     avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'),5)
 
     manipulatecsv.write_to_csv(key, avg_cluster_coefficient, filename)
-
-# TODO: クラスにしてplot, save as csvで機能分離
-# TODO: write centrality for each nodes to csv 
-#       and get ready for Regression
-# centrality ---------------------------------------------------------------------------------
-# degree centrality --------------------------------------------------------------------------
-def plot_in_degree_centrality():
-    key = 'in_degree_centrality'
-
-    in_degree_centrality_dict = nx.in_degree_centrality(G)
-
-    plot_centrality(in_degree_centrality_dict, key)
-
-def plot_out_degree_centrality():
-    key = 'out_degree_centrality'
-
-    out_degree_centrality_dict = nx.out_degree_centrality(G)
-
-    plot_centrality(out_degree_centrality_dict, key)
-
-# eigenvector centrality ---------------------------------------------------------------------
-def plot_eigenvector_centrality():
-    key = 'eigenvector_centrality'
-
-    G2 = nx.DiGraph(G)
-
-    eigenvector_centrality_dict = nx.eigenvector_centrality(G2, max_iter=5000, weight='length')
-
-    plot_centrality(eigenvector_centrality_dict, key)
-
-# betweenness centrality ---------------------------------------------------------------------
-def plot_betweenness_centrality():
-    key = 'betweenness_centrality'
-
-    G2 = nx.DiGraph(G)
-
-    betweenness_centrality_dict = nx.betweenness_centrality(G2, weight='length')
-
-    plot_centrality(betweenness_centrality_dict, key)
-
-# closeness centrality -----------------------------------------------------------------------
-def plot_closeness_centrality():
-    key = 'closeness_centrality'
-
-    closeness_centrality_dict = nx.closeness_centrality(G, distance='length')
-
-    plot_centrality(closeness_centrality_dict, key)
-
-# pagerank -----------------------------------------------------------------------------------
-def plot_pagerank():
-    key = 'pagerank'
-
-    pagerank_dict = nx.pagerank(G, weight='length')
-
-    plot_centrality(pagerank_dict, key)
-
-# 値の階級値を決め、それごとにnodes = go.Scatter()で別の色を与えていく
-# plot centrality using plotly----------------------------------------------------------------
-def sturges_rule(centrality_dict):
-
-    centrality_dict = np.asarray(list(centrality_dict.values()))
-
-    # スタージェスの公式から階級の数を求める
-    class_size = int(np.log2(centrality_dict.size).round()) + 1
-
-    return class_size
-
-def set_color(index):
-
-    # color_list = px.colors.sequential.Mint
-    # color_list = px.colors.sequential.Plotly3
-    # color_list = px.colors.sequential.Teal
-    # color_list = ['#0508b8', '#1910d8', '#3c19f0', '#6b1cfb', '#981cfd', '#bf1cfd', '#dd2bfd', '#f246fe', '#fc67fd', '#fe88fc', '#fea5fd', '#febefe', '#fec3fe']
-    color_list = ['rgb(247,251,255)', 'rgb(222,235,247)', 'rgb(198,219,239)', 'rgb(158,202,225)', 'rgb(107,174,214)', 'rgb(66,146,198)', 'rgb(33,113,181)', 'rgb(8,81,156)', 'rgb(8,48,107)']
-
-    color_list.reverse()
-
-    n = len(color_list)
-
-    if index < n:
-        color = color_list[index]
-    else:
-        color = color_list[-1]
-
-    return color
-
-def make_different_color_nodes_for_plotly(node_list, node_data_dict, plotly_data, color, index):
-
-    node_x = []
-    node_y = []
-
-    for node in node_list:
-        node = node[0]
-        node_x.append(retrieve_coordinate(node, node_data_dict)[0])
-        node_y.append(retrieve_coordinate(node, node_data_dict)[1])
-
-    nodes = go.Scatter(
-        x=node_x,
-        y=node_y,
-        mode='markers',
-        marker=dict(size=5,  color=color),
-        name='class' + str(index + 1)
-    )
-
-    plotly_data.append(nodes)
-
-    return plotly_data
-
-def plot_centrality(centrality_dict, key):
-
-    node_data_dict = dict(G.nodes.data())
-    edges_for_plotly = make_edges_for_plotly(node_data_dict)
-    plotly_data = [edges_for_plotly]
-
-    # centralityの値に基づいて降順にソート
-    centrality_dict_sorted = sorted(centrality_dict.items(), key=lambda x:x[1], reverse=True)
-
-    # 中心性の値の階級の数をスタージェスの公式から求める
-    class_size = sturges_rule(centrality_dict)
-
-    # 階級ごとにノードを分け、異なる色を付与してplotly_dataに加える
-    num_of_nodes = len(centrality_dict_sorted)
-    split_size = math.floor(num_of_nodes / class_size)
-
-    for i in range(class_size):
-
-        # 階級値は切り捨ててあるので、最後のカテゴリーが11 nodes多くなる
-        if i != (class_size - 1):
-            start = i * split_size
-            stop = (i + 1) * split_size
-
-            # node_list = [('node_ID', centrality_val), (), () ...]
-            node_list = centrality_dict_sorted[start:stop]
-        else:
-            start = i * split_size
-            node_list = centrality_dict_sorted[start:]
-
-        color = set_color(i)
-        plotly_data = make_different_color_nodes_for_plotly(node_list, node_data_dict, plotly_data, color, i)
-
-
-    # plotly Figure params
-    layout = go.Layout(
-        title = dict(
-            text = key,
-            font = dict(size=20, color='gray'),
-        ),
-        # showlegend=False,
-        xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
-        yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
-        plot_bgcolor='white',
-        width=800,
-        height=600
-    )
-
-    filename = 'results/images/html/' + key + '.html'
-    fig = go.Figure(plotly_data, layout)
-    fig.write_html(filename, auto_open=True)
-
-# plot road network---------------------------------------------------------------------------
-def retrieve_coordinate(node, node_data_dict):
-
-    x = float(node_data_dict[node]['x'])
-    y = float(node_data_dict[node]['y'])
-
-    return [x,y]
-
-def make_nodes_for_plotly(node_data_dict):
-
-    node_x = []
-    node_y = []
-
-    for node, data in node_data_dict.items():
-        node_x.append(retrieve_coordinate(node, node_data_dict)[0]) 
-        node_y.append(retrieve_coordinate(node, node_data_dict)[1])
-
-    nodes = go.Scatter(
-        x=node_x,
-        y=node_y,
-        mode='markers',
-        marker=dict(size=3, line=dict(width=1, color='red'))
-    )
-
-    return nodes
-
-def make_edges_for_plotly(node_data_dict):
-
-    edge_x = []
-    edge_y = []
-
-    edge_list = list(G.edges())
-
-    for edge in edge_list:
-
-        source = edge[0]
-        target = edge[1]
-
-        source_coordinate = retrieve_coordinate(source, node_data_dict)
-        target_coordinate = retrieve_coordinate(target, node_data_dict)
-
-        # source node coordinate
-        edge_x.append(source_coordinate[0])
-        edge_y.append(source_coordinate[1])
-
-        # target node coordinate
-        edge_x.append(target_coordinate[0])
-        edge_y.append(target_coordinate[1])
-        
-        # edge delimiter
-        edge_x.append(None)
-        edge_y.append(None)
-
-    edges = go.Scatter(
-        x = edge_x,
-        y = edge_y,
-        mode = 'lines',
-        opacity = 0.7,
-        line = dict(width = 1, color='gray'),
-        showlegend=False
-    )
-
-    return edges
-
-# plot road network using plotly
-def plot_road_network():
-
-    node_data_dict = dict(G.nodes.data())
-
-    nodes_for_plotly = make_nodes_for_plotly(node_data_dict)
-    edges_for_plotly = make_edges_for_plotly(node_data_dict)
-
-    # plotly Figure params
-    data = [edges_for_plotly, nodes_for_plotly]
-    layout = go.Layout(
-        title = dict(
-            text = 'Road Network in Tachikawa',
-            font = dict(size=20, color='gray'),
-        ),
-        showlegend=False,
-        xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
-        yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
-        plot_bgcolor='white',
-        width=800,
-        height=600
-    )
-
-    fig = go.Figure(data, layout)
-    fig.write_html('results/images/html/tachikawa.html', auto_open=True)
-
 # --------------------------------------------------------------------------------------------
 
 # mini network test --------------------------------------------------------------------------
@@ -545,18 +294,10 @@ def plot_road_network():
 # path_length()
 # retrieve_diameter()
 # retrieve_diameter_path()
-plot_diameter()
+# plot_diameter()
 # calc_density()
 # calc_cluster_coefficient()
 # calc_avg_cluster_coefficient()
-# plot_in_degree_centrality()
-# plot_out_degree_centrality()
-# plot_eigenvector_centrality()
-# plot_betweenness_centrality()
-# plot_closeness_centrality()
-# plot_pagerank()
-# plot_road_network()
-
 
 # --------------------------------------------------------------------------------------------
 
