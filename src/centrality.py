@@ -1,6 +1,8 @@
 import csv
 import math
+from typing import ValuesView
 import networkx as nx
+from networkx.algorithms import centrality
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,12 +13,9 @@ import manipulatecsv
 from initnetwork import InitNetwork
 from plotroadnet import PlotNetwork
 
-# TODO: クラスにしてplot, save as csvで機能分離
-# TODO: write centrality for each nodes to csv 
-#       and get ready for Regression
-# centrality ---------------------------------------------------------------------------------
 class Centrality(PlotNetwork, InitNetwork):
 
+    initnet = InitNetwork()
     plotnet = PlotNetwork()
 
     node_data_dict = {}
@@ -26,6 +25,7 @@ class Centrality(PlotNetwork, InitNetwork):
 
     def __init__(self):
         self.node_data_dict = dict(self.G.nodes.data())
+        self.initnet.__init__()
 
     def return_centrality_dict(self, key):
         centrality_dict = {}
@@ -33,15 +33,23 @@ class Centrality(PlotNetwork, InitNetwork):
         if key in self.keys_require_digraph:
 
             G2 = nx.DiGraph(self.G)
-            func = 'nx.' + key + '(G2)'
-            centrality_dict = eval(func)
+
+            if key == 'eigenvector_centrality':
+                func = "nx." + key + "(G2, max_iter=5000, weight='length')"
+                centrality_dict = eval(func)
+            else:
+                func = "nx." + key + "(G2, weight='length')"
+                centrality_dict = eval(func)
 
         else:
             if key in self.keys_weightname_is_distance:
                 func = "nx." + key + "(self.G, distance='length')"                
                 centrality_dict = eval(func)
-            else:
+            elif key == 'pagerank':
                 func = "nx." + key + "(self.G, weight='length')"
+                centrality_dict = eval(func)
+            else:
+                func = "nx." + key + "(self.G)"
                 centrality_dict = eval(func)
 
         return centrality_dict
@@ -97,6 +105,47 @@ class Centrality(PlotNetwork, InitNetwork):
 
         return plotly_data
 
+    def save_centrality_to_csv(self, key):
+        centrality_dict = self.return_centrality_dict(key)
+        filename = 'results/centrality.csv'
+
+        df = pd.read_csv(filename)
+
+        # nodes = list(centrality_dict.keys())
+
+        li = list(centrality_dict.values())
+        li = [round(val, 7) for val in li]
+
+        df[key] = li
+
+        print(df)
+
+        df.to_csv(filename, mode='w')
+
+
+    def save_all_centrality_to_csv(self):
+        filename = 'results/centrality.csv'
+
+        key_list = ['in_degree_centrality', 'out_degree_centrality', 'eigenvector_centrality', 'betweenness_centrality', 'closeness_centrality', 'pagerank']        
+        df = pd.DataFrame()
+
+        for key in key_list:
+            centrality_dict = self.return_centrality_dict(key)
+
+            nodes = [node for node in centrality_dict.keys()]
+
+            values = list(centrality_dict.values())
+            values = [round(val, 7) for val in values]
+
+            df['node'] = nodes
+            # df.reindex(nodes)
+            # df.index.name = 'node'
+            df[key] = values
+
+            print(df)
+        
+        df.to_csv(filename, mode='w')
+
     # 値の階級値を決め、それごとにnodes = go.Scatter()で別の色を与えていく
     def plot_centrality(self, key):
 
@@ -148,3 +197,6 @@ class Centrality(PlotNetwork, InitNetwork):
         filename = 'results/images/html/' + key + '.html'
         fig = go.Figure(plotly_data, layout)
         fig.write_html(filename, auto_open=True)
+
+# cent = Centrality()
+# cent.save_all_centrality_to_csv()

@@ -104,9 +104,4 @@ class PlotNetwork(InitNetwork):
 
         fig = go.Figure(data, layout)
 
-        # FIXME:filename
-        fig.write_html('tachikawa.html', auto_open=True)
-
-
-plotnet = PlotNetwork()
-plotnet.plot_road_network()
+        fig.write_html('results/images/html/tachikawa.html', auto_open=True)
