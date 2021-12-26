@@ -135,7 +135,9 @@ class Centrality(PlotNetwork, InitNetwork):
             nodes = [node for node in centrality_dict.keys()]
 
             values = list(centrality_dict.values())
-            values = [round(val, 7) for val in values]
+
+            if key != 'eigenvector_centrality':
+                values = [round(val, 7) for val in values]
 
             df['node'] = nodes
             # df.reindex(nodes)
@@ -198,5 +200,5 @@ class Centrality(PlotNetwork, InitNetwork):
         fig = go.Figure(plotly_data, layout)
         fig.write_html(filename, auto_open=True)
 
-# cent = Centrality()
-# cent.save_all_centrality_to_csv()
+cent = Centrality()
+cent.save_all_centrality_to_csv()
