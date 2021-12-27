@@ -23,7 +23,7 @@ import manipulatecsv
 # sample node
 # ["190137856"]["190137876"]
 
-G = nx.read_graphml('data/tachikawa.graphml')
+G = nx.read_graphml('data//road/tachikawa.graphml')
 filename = 'results/basic_feature_value.csv'
 
 def edge_length_str_to_float():
