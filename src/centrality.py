@@ -35,7 +35,7 @@ class Centrality(PlotNetwork, InitNetwork):
             G2 = nx.DiGraph(self.G)
 
             if key == 'eigenvector_centrality':
-                func = "nx." + key + "(G2, max_iter=5000, weight='length')"
+                func = "nx." + key + "(G2, max_iter=5000)"
                 centrality_dict = eval(func)
             else:
                 func = "nx." + key + "(G2, weight='length')"
@@ -199,6 +199,3 @@ class Centrality(PlotNetwork, InitNetwork):
         filename = 'results/images/html/' + key + '.html'
         fig = go.Figure(plotly_data, layout)
         fig.write_html(filename, auto_open=True)
-
-cent = Centrality()
-cent.save_all_centrality_to_csv()
