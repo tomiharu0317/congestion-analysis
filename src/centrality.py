@@ -140,8 +140,6 @@ class Centrality(PlotNetwork, InitNetwork):
                 values = [round(val, 7) for val in values]
 
             df['node'] = nodes
-            # df.reindex(nodes)
-            # df.index.name = 'node'
             df[key] = values
 
             print(df)
