@@ -15,27 +15,15 @@ from networkx.readwrite.graph6 import data_to_n
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from initnetwork import InitNetwork
 import japanize_matplotlib
 import plotly.graph_objects as go
 import plotly.express as px
 import manipulatecsv
+from plotroadnet import PlotNetwork
 
 # sample node
 # ["190137856"]["190137876"]
-
-G = nx.read_graphml('data//road/tachikawa.graphml')
-filename = 'results/basic_feature_value.csv'
-
-def edge_length_str_to_float():
-    length_dict = nx.get_edge_attributes(G, name='length')
-
-    # 'length' attributesがstrなのでfloatに変換
-    for key, value in length_dict.items():
-        length_dict[key] = {'length': round(float(value), 3)}
-
-    nx.set_edge_attributes(G, length_dict)
-
-edge_length_str_to_float()
 
 # 基本特徴量---------------------------------------------
 # ノード数
@@ -48,282 +36,237 @@ edge_length_str_to_float()
 # エッジ密度
 # クラスター係数
 # 平均クラスター係数
-# 次数中心性
-# 固有値中心性
-# 媒介中心性
-# 近接中心性
-# ページランク
 # -----------------------------------------------------
+class AnalyzeNetwork(PlotNetwork, InitNetwork):
 
-def is_digraph():
-    key = 'is_directed'
-    value = nx.is_directed(G)
-    manipulatecsv.write_to_csv(key, value, filename) 
+    initnet = InitNetwork()
+    plotnet = PlotNetwork()
+    filename = 'results/basic_feature_value.csv'
 
-# number of nodes : 4106
-def num_of_nodes():
-    key = 'num_of_nodes'
-    value = nx.number_of_nodes(G)
-    manipulatecsv.write_to_csv(key, value, filename) 
+    def __init__(self):
+        self.node_data_dict = dict(self.G.nodes.data())
+        self.initnet.__init__()
 
-# number of edges : 10515
-def num_of_edges():
-    key = 'num_of_edges'
-    value = nx.number_of_edges(G)
-    manipulatecsv.write_to_csv(key, value, filename)
+    def is_digraph(self):
+        key = 'is_directed'
+        value = nx.is_directed(self.G)
+        manipulatecsv.write_to_csv(key, value, self.filename) 
 
-# degree histgram ------------------------------------------------------------------------
+    # number of nodes : 4106
+    def num_of_nodes(self):
+        key = 'num_of_nodes'
+        value = nx.number_of_nodes(self.G)
+        manipulatecsv.write_to_csv(key, value, self.filename) 
 
-# A list of frequencies of degrees.
-# The degree values are the index in the list. : 
-# [0, 0, 763, 56, 482, 116, 2319, 49, 319, 1, 1]
-def plot_degree_hist():
-    degree_hist = nx.degree_histogram(G)
-    max_degree = len(degree_hist) - 1
-    labels = range(0, max_degree + 1)
+    # number of edges : 10515
+    def num_of_edges(self):
+        key = 'num_of_edges'
+        value = nx.number_of_edges(self.G)
+        manipulatecsv.write_to_csv(key, value, self.filename)
 
-    x = np.arange(len(labels))
-    width = 0.7
+    # degree histgram ------------------------------------------------------------------------
 
-    fig, ax = plt.subplots()
-    rects = ax.bar(x, degree_hist, width)
+    # A list of frequencies of degrees.
+    # The degree values are the index in the list. : 
+    # [0, 0, 763, 56, 482, 116, 2319, 49, 319, 1, 1]
+    def plot_degree_hist(self):
+        degree_hist = nx.degree_histogram(self.G)
+        max_degree = len(degree_hist) - 1
+        labels = range(0, max_degree + 1)
 
-    ax.set_title('立川市自動車道ネットワークにおける次数のヒストグラム')
-    ax.set_xlabel('次数' + r'$k$')
-    ax.set_ylabel(r'$n(k)$')
+        x = np.arange(len(labels))
+        width = 0.7
 
-    ax.bar_label(rects)
+        fig, ax = plt.subplots()
+        rects = ax.bar(x, degree_hist, width)
 
-    fig.tight_layout()
-    fig.savefig('results/images/degree_hist.jpg')
+        ax.set_title('立川市自動車道ネットワークにおける次数のヒストグラム')
+        ax.set_xlabel('次数' + r'$k$')
+        ax.set_ylabel(r'$n(k)$')
 
-# degree distribution --------------------------------------------------------------------
+        ax.bar_label(rects)
 
-def plot_degree_dist():
+        fig.tight_layout()
+        fig.savefig('results/images/degree_hist.jpg')
 
-    degree_dist = make_degree_dist()
+    # degree distribution --------------------------------------------------------------------
 
-    max_degree = len(degree_dist) - 1
-    labels = range(0, max_degree + 1)
+    def plot_degree_dist(self):
 
-    x = np.arange(len(labels))
-    width = 0.7
+        degree_dist = self.make_degree_dist()
 
-    fig, ax = plt.subplots()
-    rects = ax.bar(x, degree_dist, width)
+        max_degree = len(degree_dist) - 1
+        labels = range(0, max_degree + 1)
 
-    ax.set_title('立川市自動車道ネットワークにおける次数分布')
-    ax.set_xlabel('次数' + r'$k$')
-    ax.set_ylabel(r'$P(k)$')
+        x = np.arange(len(labels))
+        width = 0.7
 
-    ax.bar_label(rects)
+        fig, ax = plt.subplots()
+        rects = ax.bar(x, degree_dist, width)
 
-    fig.tight_layout()
-    fig.savefig('results/images/degree_dist.jpg')
+        ax.set_title('立川市自動車道ネットワークにおける次数分布')
+        ax.set_xlabel('次数' + r'$k$')
+        ax.set_ylabel(r'$P(k)$')
 
+        ax.bar_label(rects)
 
-def make_degree_dist():
-    degree_hist = nx.degree_histogram(G)
-    num_of_nodes = nx.number_of_nodes(G) 
-    
-    degree_dist = [round(n_k / num_of_nodes, 2) for n_k in degree_hist]
-    
-    return degree_dist
+        fig.tight_layout()
+        fig.savefig('results/images/degree_dist.jpg')
 
-# average degree ---------------------------------------------------------------------------
 
-# result : 5.12
-def average_degree():
-    key = 'average_degree'
+    def make_degree_dist(self):
+        degree_hist = nx.degree_histogram(self.G)
+        num_of_nodes = nx.number_of_nodes(self.G) 
+        
+        degree_dist = [round(n_k / num_of_nodes, 2) for n_k in degree_hist]
+        
+        return degree_dist
 
-    num_of_nodes = nx.number_of_nodes(G) 
+    # average degree ---------------------------------------------------------------------------
 
-    avg_deg = round(sum([degree for node, degree in nx.degree(G)]) / num_of_nodes, 2)
+    # result : 5.12
+    def average_degree(self):
+        key = 'average_degree'
 
-    manipulatecsv.write_to_csv(key, avg_deg, filename)
+        num_of_nodes = nx.number_of_nodes(self.G) 
 
-# average path length ------------------------------------------------------------------------
+        avg_deg = round(sum([degree for node, degree in nx.degree(self.G)]) / num_of_nodes, 2)
 
-# result : 4044.685493640773
-def average_path_length():
+        manipulatecsv.write_to_csv(key, avg_deg, self.filename)
 
-    key = 'average_path_length'
+    # average path length ------------------------------------------------------------------------
 
-    average_path_length = nx.average_shortest_path_length(G, weight='length', method='dijkstra')
+    # result : 4044.685493640773
+    def average_path_length(self):
 
-    manipulatecsv.write_to_csv(key, average_path_length, filename)
+        key = 'average_path_length'
 
-# diameter --------------------------------------------------------------------------------------
+        average_path_length = nx.average_shortest_path_length(self.G, weight='length', method='dijkstra')
 
-# 全てのshortest path lengthから最大のものを取得しdiameterとする
-def retrieve_diameter():
+        manipulatecsv.write_to_csv(key, average_path_length, self.filename)
 
-    diameter = 0
-    path = []
+    # diameter --------------------------------------------------------------------------------------
 
-    # shortest_path_length_dict = {
-    #     source node : {
-    #         target node: length,
-    #         target node: length
-    #     }
-    # }
-    # shortest_path_length_dict = dict(nx.shortest_path_length(G, weight='length'))
-    shortest_path_length_dict = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
+    # 全てのshortest path lengthから最大のものを取得しdiameterとする
+    def retrieve_diameter(self):
 
-    # -------------------------------------------------------
-    for source_node, length_dict in list(shortest_path_length_dict.items()):
-        length_dict = dict(length_dict)
+        diameter = 0
+        path = []
 
-        max_length = max(length_dict.values())
+        # shortest_path_length_dict = {
+        #     source node : {
+        #         target node: length,
+        #         target node: length
+        #     }
+        # }
+        # shortest_path_length_dict = dict(nx.shortest_path_length(G, weight='length'))
+        shortest_path_length_dict = dict(nx.all_pairs_dijkstra_path_length(self.G, weight='length'))
 
-        if diameter < max_length:
+        # -------------------------------------------------------
+        for source_node, length_dict in list(shortest_path_length_dict.items()):
+            length_dict = dict(length_dict)
 
-            diameter = max_length
+            max_length = max(length_dict.values())
 
-            for target_node, length_to_target in length_dict.items():
+            if diameter < max_length:
 
-                if diameter == length_to_target:
-                    path = [source_node, target_node]
+                diameter = max_length
 
-    path = '-'.join(path)
+                for target_node, length_to_target in length_dict.items():
 
-    manipulatecsv.write_to_csv('diameter', diameter, filename)
-    manipulatecsv.write_to_csv('diameter_source_target', path, filename)
+                    if diameter == length_to_target:
+                        path = [source_node, target_node]
 
-# [source, target] から さらに細かい path を取得 
-def retrieve_diameter_path():
-    source_target = manipulatecsv.retrieve_value_from_csv('diameter_source_target', filename).split('-')
-    
-    source_node = source_target[0]
-    target_node = source_target[1]
+        path = '-'.join(path)
 
-    diameter_path = nx.dijkstra_path(G, source_node, target_node, weight='length')
-    diameter_path = '-'.join(diameter_path)
+        manipulatecsv.write_to_csv('diameter', diameter, self.filename)
+        manipulatecsv.write_to_csv('diameter_source_target', path, self.filename)
 
-    manipulatecsv.write_to_csv('diameter_path', diameter_path, filename)
+    # [source, target] から さらに細かい path を取得 
+    def retrieve_diameter_path(self):
+        source_target = manipulatecsv.retrieve_value_from_csv('diameter_source_target', self.filename).split('-')
+        
+        source_node = source_target[0]
+        target_node = source_target[1]
 
-def make_diameter_nodes_for_plotly(diameter_path_list, node_data_dict):
+        diameter_path = nx.dijkstra_path(self.G, source_node, target_node, weight='length')
+        diameter_path = '-'.join(diameter_path)
 
-    node_x = []
-    node_y = []
+        manipulatecsv.write_to_csv('diameter_path', diameter_path, self.filename)
 
-    for node in diameter_path_list:
-        node_x.append(retrieve_coordinate(node, node_data_dict)[0]) 
-        node_y.append(retrieve_coordinate(node, node_data_dict)[1])
+    def make_diameter_nodes_for_plotly(self, diameter_path_list):
 
-    nodes = go.Scatter(
-        x=node_x,
-        y=node_y,
-        mode='markers',
-        marker=dict(size=6, color='red')
-    )
+        node_x = []
+        node_y = []
 
-    return nodes
+        for node in diameter_path_list:
+            node_x.append(self.plotnet.retrieve_coordinate(node)[0]) 
+            node_y.append(self.plotnet.retrieve_coordinate(node)[1])
 
-def plot_diameter():
+        nodes = go.Scatter(
+            x=node_x,
+            y=node_y,
+            mode='markers',
+            marker=dict(size=6, color='red')
+        )
 
-    node_data_dict = dict(G.nodes.data())
+        return nodes
 
-    diameter_path = manipulatecsv.retrieve_value_from_csv('diameter_path', filename)
-    diameter_path_list = diameter_path.split('-')
+    def plot_diameter(self):
 
-    diameter_nodes_for_plotly = make_diameter_nodes_for_plotly(diameter_path_list, node_data_dict)
+        diameter_path = manipulatecsv.retrieve_value_from_csv('diameter_path', self.filename)
+        diameter_path_list = diameter_path.split('-')
 
-    # nodes_for_plotly = make_nodes_for_plotly(node_data_dict)
-    edges_for_plotly = make_edges_for_plotly(node_data_dict)
+        diameter_nodes_for_plotly = self.make_diameter_nodes_for_plotly(diameter_path_list)
 
-    # plotly Figure params
-    data = [edges_for_plotly, diameter_nodes_for_plotly]
-    layout = go.Layout(
-        title = dict(
-            text = 'diameter path',
-            font = dict(size=20, color='gray'),
-        ),
-        showlegend=False,
-        xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
-        yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
-        plot_bgcolor='white',
-        width=800,
-        height=600
-    )
+        # nodes_for_plotly = make_nodes_for_plotly(node_data_dict)
+        edges_for_plotly = self.plotnet.make_edges_for_plotly()
 
-    fig = go.Figure(data, layout)
-    fig.write_html('results/images/html/diameter.html', auto_open=True)
-    
-# density ------------------------------------------------------------------------------------
-def calc_density():
-    key = 'density'
-    density_val = round(nx.density(G), 6)
+        # plotly Figure params
+        data = [edges_for_plotly, diameter_nodes_for_plotly]
+        layout = go.Layout(
+            title = dict(
+                text = 'diameter path',
+                font = dict(size=20, color='gray'),
+            ),
+            showlegend=False,
+            xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
+            yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
+            plot_bgcolor='white',
+            width=800,
+            height=600
+        )
 
-    manipulatecsv.write_to_csv(key, density_val, filename)
+        fig = go.Figure(data, layout)
+        fig.write_html('results/images/html/diameter.html', auto_open=True)
+        
+    # density ------------------------------------------------------------------------------------
+    def calc_density(self):
+        key = 'density'
+        density_val = round(nx.density(self.G), 6)
 
-# cluster coefficient-------------------------------------------------------------------------
-def calc_cluster_coefficient():
-    key = 'cluster_coefficient'
-    cluster_coefficient = nx.clustering(G, weight='length')
+        manipulatecsv.write_to_csv(key, density_val, self.filename)
 
+    # cluster coefficient-------------------------------------------------------------------------
+    def calc_cluster_coefficient(self):
+        key = 'cluster_coefficient'
+        cluster_coefficient = nx.clustering(self.G, weight='length')
 
-# MultiDiGraphでは計算できないのでDiGraphに変換
-# MultiDiGraph edge num: 10515
-# DiGraph      edge num: 10441 
-# average cluster coefficient-----------------------------------------------------------------
-def calc_avg_cluster_coefficient():
-    key = 'average_cluster_coefficient'
 
-    G2 = nx.DiGraph(G)
+    # MultiDiGraphでは計算できないのでDiGraphに変換
+    # MultiDiGraph edge num: 10515
+    # DiGraph      edge num: 10441 
+    # average cluster coefficient-----------------------------------------------------------------
+    def calc_avg_cluster_coefficient(self):
+        key = 'average_cluster_coefficient'
 
-    # G2_edges = set(G2.edges())
-    # for edge in set(G.edges()):
-    #     if edge not in G2_edges:
-    #         print(edge)
+        G2 = nx.DiGraph(self.G)
 
-    avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'),5)
+        # G2_edges = set(G2.edges())
+        # for edge in set(G.edges()):
+        #     if edge not in G2_edges:
+        #         print(edge)
 
-    manipulatecsv.write_to_csv(key, avg_cluster_coefficient, filename)
-# --------------------------------------------------------------------------------------------
+        avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'),5)
 
-# mini network test --------------------------------------------------------------------------
-
-# execute function ---------------------------------------------------------------------------
-# print('number of nodes: ', num_of_nodes)
-# print('number of edges: ', num_of_edges)
-# plot_degree_hist()
-# plot_degree_dist()
-# average_degree()
-# average_path_length()
-# path_length()
-# retrieve_diameter()
-# retrieve_diameter_path()
-# plot_diameter()
-# calc_density()
-# calc_cluster_coefficient()
-# calc_avg_cluster_coefficient()
-
-# --------------------------------------------------------------------------------------------
-
-# retrieve attiributes from node/edge data
-def retrieve_attributes_from_data():
-    data_dict = dict(G.nodes.data())
-    pos = {}
-
-    for node, data in data_dict.items():
-        pos[node] = (float(data_dict[node]['x']), float(data_dict[node]['y']))
-
-
-# other feature values -----------------------------------------------------------------------
-
-# edge length distribution ----------------------------------------------------------------
-
-# FIXME
-# 道路の長さで重み付けした最短距離の平均通過交差点数は
-# all_pairs_dijkstraで計算できる
-# len(path)ごとにlengthを集計して平均すれば良い
-def path_length():
-
-    shortest_path_dict = dict(nx.all_pairs_dijkstra_path(G, weight='length'))
-
-    print(shortest_path_dict["190137856"]["190137876"])
-    # path_length_dict = dict(nx.all_pairs_dijkstra_path_length(G, weight='length'))
-    # print(path_length_dict["190137856"]["190137876"])
-
-# ----------------------------------------------------------------------------------------------
+        manipulatecsv.write_to_csv(key, avg_cluster_coefficient, self.filename)
