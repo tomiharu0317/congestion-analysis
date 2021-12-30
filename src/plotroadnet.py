@@ -118,6 +118,3 @@ class PlotNetwork(InitNetwork):
 
         fig = go.Figure(data, layout)
         fig.write_html(filename, auto_open=True)
-
-plotnet = PlotNetwork()
-plotnet.plot_road_network(2)
