@@ -81,17 +81,31 @@ class PlotNetwork(InitNetwork):
 
 
     # plot road network using plotly
-    def plot_road_network(self):
+    # code: {1: tachikawa, 2:target_region}
+    def plot_road_network(self, code):
 
 
         nodes_for_plotly = self.make_nodes_for_plotly()
         edges_for_plotly = self.make_edges_for_plotly()
 
         # plotly Figure params
-        data = [edges_for_plotly, nodes_for_plotly]
+        data = []
+        title_text = ''
+        filename = ''
+
+        if code == 1:
+            data = [edges_for_plotly, nodes_for_plotly]
+            title_text = 'Road Network in Tachikawa'
+            filename = 'results/images/html/tachikawa.html'
+
+        else:
+            data = [edges_for_plotly]
+            title_text = 'Road Network in target region'
+            filename = 'results/images/html/target_region.html'
+
         layout = go.Layout(
             title = dict(
-                text = 'Road Network in Tachikawa',
+                text = title_text,
                 font = dict(size=20, color='gray'),
             ),
             showlegend=False,
@@ -103,5 +117,7 @@ class PlotNetwork(InitNetwork):
         )
 
         fig = go.Figure(data, layout)
+        fig.write_html(filename, auto_open=True)
 
-        fig.write_html('results/images/html/tachikawa.html', auto_open=True)
+plotnet = PlotNetwork()
+plotnet.plot_road_network(2)
