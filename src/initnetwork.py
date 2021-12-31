@@ -10,7 +10,8 @@ import manipulatecsv
 
 class InitNetwork:
 
-    G = nx.read_graphml('data/road/tachikawa.graphml')
+    # G = nx.read_graphml('data/road/tachikawa.graphml')
+    G = nx.read_graphml('data/road/target_region.graphml')
 
     def __init__(self):
         length_dict = nx.get_edge_attributes(self.G, name='length')
