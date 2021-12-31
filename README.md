@@ -1,6 +1,8 @@
 ## 分析対象
 
-立川市の道路ネットワーク
+立川市において、以下の道路が非常に混雑する問題がある。この混雑の要因を分析することが目的である。
+
+![shortest_path_googlemap](results/images/shortest_path_googlemap.png)
 
 ## データ
 
@@ -47,25 +49,13 @@
 }
 ```
 
-### 交通量
-
-[全国道路・街路交通情勢調査](https://www.mlit.go.jp/road/ir/ir-data/ir-data.html)
-
-- 平成 22 年度 全国道路・街路交通情勢調査一般交通量調査 集計表
-- 平成 27 年度 全国道路・街路交通情勢調査一般交通量調査 集計表
-
-[交通量統計表 警視庁](https://www.keishicho.metro.tokyo.lg.jp/about_mpd/jokyo_tokei/tokei_jokyo/ryo.html)
-
-- 令和元年 交通量統計表 警視庁
-- 令和 2 年 交通量統計表 警視庁
-
 ## 分析方法
 
 1. 道路ネットワークの可視化 (ノード：交差点)
 2. ネットワークの基本特徴量を算出
 3. 中心性指標に基づいてグラデーションで色付けしプロット
-4. 交通量をエッジに重み付けし、重みを可視化に反映
-5. ネットワーク指標を用いて回帰分析?
+4. 中央自動車道の出口から目的地までの最短経路を算出
+5. 最短経路に含まれている回数が多い道路ほど濃い色でプロット
 
 #### 基本特徴量
 
@@ -88,20 +78,6 @@
 #### オプション特徴量(意味を見出しにくい)
 
 - [ ] ノード間距離の分布(各距離ごとのノード間距離の平均のグラフ)
-
-### 実行
-
-依存関係のインストール
-
-```
-$ pip install -r requirements.txt
-```
-
-立川市の道路データを取得
-
-```
-$ python3 fetch-road-network.py
-```
 
 ## 結果
 
@@ -159,3 +135,5 @@ $ python3 fetch-road-network.py
 ![shortest_path](results/images/shortest_path_to_dest_zoom1.png)
 
 ![shortest_path](results/images/shortest_path_to_dest_zoom2.png)
+
+![shortest_path_googlemap](results/images/shortest_path_googlemap.png)
