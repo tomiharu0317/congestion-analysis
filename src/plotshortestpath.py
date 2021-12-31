@@ -1,13 +1,17 @@
 import networkx as nx
+from networkx.classes.function import edges
+from networkx.readwrite.graph6 import data_to_n
 import plotly.graph_objects as go
 import plotly.express as px
 from initnetwork import InitNetwork
 from plotroadnet import PlotNetwork
+from centrality import Centrality
 
-class PlotShortestPath(PlotNetwork, InitNetwork):
+class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
 
     initnet = InitNetwork()
     plotnet = PlotNetwork()
+    centrality = Centrality()
 
     def __init__(self):
         self.node_data_dict = dict(self.G.nodes.data())
@@ -23,10 +27,11 @@ class PlotShortestPath(PlotNetwork, InitNetwork):
             node_y.append(self.retrieve_coordinate(node)[1])
 
         nodes = go.Scatter(
+            showlegend=False,
             x=node_x,
             y=node_y,
             mode='markers',
-            marker=dict(size=6, line=dict(width=1, color='green'))
+            marker=dict(size=3, color='blue')
         )
 
         return nodes
@@ -110,11 +115,152 @@ class PlotShortestPath(PlotNetwork, InitNetwork):
 
     # 同じ経路を通るほどその道路の色を濃くする
     # shortest_path_list: [[source, somenodes, target], [source, somenodes, target], ...]
-    def plot_shortest_path(self, shortest_path_list):
+    def make_edge_appearance_list(self, shortest_path_list):
+
+        # all pattern of edges
+        # {(source, target), (source, target)}
+        edge_pattern_list = set()
+
+        # edge_appearance_dict = {(source, target): num_of_appearance}
+        edge_appearance_dict = dict()
+
+        # shortest_path: [source, some nodes, target]
+        for shortest_path in shortest_path_list:
+            n = len(shortest_path)
+
+            for i in range(n - 1):
+                edge =(shortest_path[i], shortest_path[i+1])
+
+
+                if edge in edge_pattern_list:
+                    edge_appearance_dict[edge] += 1
+                else:
+                    edge_pattern_list.add(edge)
+                    edge_appearance_dict[edge] = 1
+
+        max_appearance = max(edge_appearance_dict.values())
+
+        # indexがappearanceの数に対応（降順）
+        edge_appearance_list = [list() for i in range(max_appearance)]
+
+        for edge, appearance in edge_appearance_dict.items():
+            edge_appearance_list[-appearance].append(edge)
+
+        return edge_appearance_list
+
+    def make_dest_node_for_plotly(self):
+
+        node_x = []
+        node_y = []
+
+        node_x.append(self.retrieve_coordinate("912045522")[0]) 
+        node_y.append(self.retrieve_coordinate("912045522")[1])
+
+        nodes = go.Scatter(
+            x=node_x,
+            y=node_y,
+            mode='markers',
+            marker=dict(size=3, color='blue'),
+            showlegend=False,
+        )
+
+        return nodes
+
+    def add_different_color_edges_to_data(self, edge_list, data, index, max_num_used):
+
+        edge_x = []
+        edge_y = []
+
+        for edge in edge_list:
+
+            source = edge[0]
+            target = edge[1]
+
+            source_coordinate = self.plotnet.retrieve_coordinate(source)
+            target_coordinate = self.plotnet.retrieve_coordinate(target)
+
+            # source node coordinate
+            edge_x.append(source_coordinate[0])
+            edge_y.append(source_coordinate[1])
+
+            # target node coordinate
+            edge_x.append(target_coordinate[0])
+            edge_y.append(target_coordinate[1])
+            
+            # edge delimiter
+            edge_x.append(None)
+            edge_y.append(None)
+
+        color = self.centrality.set_color(index)
+
+        edges = go.Scatter(
+            x = edge_x,
+            y = edge_y,
+            mode = 'lines',
+            opacity = 0.7,
+            line = dict(width = 3, color=color),
+            name = 'Number of times used' + str(max_num_used - index)
+        )
+
+        data.append(edges)
+
+        return data
+
+    def add_shortest_path_edges_for_plotly(self, edge_appearance_list, data):
+
+        max_num_used = len(edge_appearance_list)
+
+        for index in range(max_num_used):
+            # edge_list = [(source, target), (source, target)]
+            edge_list = edge_appearance_list[index]
+
+            data = self.add_different_color_edges_to_data(edge_list, data, index, max_num_used)
+
+        return data
+
+    def plot_shortest_path(self, edge_appearance_list):
+
+        motorway_node_set = self.retrieve_motorway_nodes()
+        nodes_for_plotly = self.make_motorway_nodes_for_plotly(motorway_node_set)
+
+        edges_for_plotly = self.make_edges_for_plotly()
+        
+        dest_node_for_plotly = self.make_dest_node_for_plotly()
+
+        data = [edges_for_plotly]
+
+        data = self.add_shortest_path_edges_for_plotly(edge_appearance_list, data)
+
+        data.append(nodes_for_plotly)
+        data.append(dest_node_for_plotly)
+
+        layout = go.Layout(
+            title = dict(
+                text = 'shortest path to destination',
+                font = dict(size=20, color='gray'),
+            ),
+            # showlegend=False,
+            xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
+            yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
+            plot_bgcolor='white',
+            width=800,
+            height=600
+        )
+
+        fig = go.Figure(data, layout)
+        fig.write_html('results/images/html/shortest_path_to_dest_2.html', auto_open=True)
+
+    def main(self):
+
+        shortest_path_list = self.make_shortest_path_list()
+
+        edge_appearance_list = self.make_edge_appearance_list(shortest_path_list)
+
+        self.plot_shortest_path(edge_appearance_list)
 
         return
 
 plot = PlotShortestPath()
-# plot.make_shortest_path_list()
+plot.main()
 
 

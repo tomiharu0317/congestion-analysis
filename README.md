@@ -151,3 +151,11 @@ $ python3 fetch-road-network.py
 #### ページランク
 
 ![pagerank](results/images/pagerank.png)
+
+### 中央自動車道から昭和記念公園までの最短経路
+
+![shortest_path](results/images/shortest_path_to_dest_original.png)
+
+![shortest_path](results/images/shortest_path_to_dest_zoom1.png)
+
+![shortest_path](results/images/shortest_path_to_dest_zoom2.png)
