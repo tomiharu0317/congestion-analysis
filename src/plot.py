@@ -139,7 +139,7 @@ class PlotFunc(InitNetwork):
         # color_list = ['#0508b8', '#1910d8', '#3c19f0', '#6b1cfb', '#981cfd', '#bf1cfd', '#dd2bfd', '#f246fe', '#fc67fd', '#fe88fc', '#fea5fd', '#febefe', '#fec3fe']
         color_list = ['rgb(247,251,255)', 'rgb(222,235,247)', 'rgb(198,219,239)', 'rgb(158,202,225)', 'rgb(107,174,214)', 'rgb(66,146,198)', 'rgb(33,113,181)', 'rgb(8,81,156)', 'rgb(8,48,107)']
 
-        color_list.reverse()
+        # color_list.reverse()
 
         n = len(color_list)
 
@@ -157,7 +157,7 @@ class PlotFunc(InitNetwork):
                 text = title_text,
                 font = dict(size=20, color='gray'),
             ),
-            showlegend=False,
+            # showlegend=False,
             xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
             yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
             plot_bgcolor='white',

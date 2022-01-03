@@ -1,12 +1,16 @@
 import pandas as pd
 import networkx as nx
-from networkx.classes.function import edges
+import matplotlib.pyplot as plt
+import numpy as np
+import math
+from networkx.classes.function import edges, number_of_edges
 from networkx.readwrite.graph6 import data_to_n
 import plotly.graph_objects as go
 import plotly.express as px
 from initnetwork import InitNetwork
 from plot import PlotFunc
-class PlotShortestPath(PlotFunc, InitNetwork):
+from centrality import Centrality
+class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
     initnet = InitNetwork()
 
@@ -89,6 +93,7 @@ class PlotShortestPath(PlotFunc, InitNetwork):
 
         return shortest_path_list
 
+    # FIXME: legacy code is here.
     # 同じ経路を通るほどその道路の色を濃くする
     # shortest_path_list: [[source, somenodes, target], [source, somenodes, target], ...]
     def make_edge_appearance_list(self, shortest_path_list):
@@ -116,15 +121,67 @@ class PlotShortestPath(PlotFunc, InitNetwork):
 
         max_num_used = max(edge_appearance_dict.values())
 
-        # indexがappearanceの数に対応（降順）
+        # indexがその道路が使われた回数に対応（降順）
         edge_appearance_list = [list() for i in range(max_num_used)]
 
-        for edge, appearance in edge_appearance_dict.items():
-            edge_appearance_list[-appearance].append(edge)
+        for edge, num_used in edge_appearance_dict.items():
+            edge_appearance_list[-num_used].append(edge)
 
         return edge_appearance_list
 
-    def add_different_color_edges_to_data(self, edge_list, data, index, max_num_used):
+    def make_edge_used_num_dict(self, shortest_path_list):
+
+        # all pattern of edges
+        # {(source, target), (source, target)}
+        edge_pattern_set = set()
+
+        # edge_appearance_dict = {(source, target): num_of_appearance}
+        edge_appearance_dict = dict()
+
+        # shortest_path: [source, some nodes, target]
+        for shortest_path in shortest_path_list:
+            n = len(shortest_path)
+
+            for i in range(n - 1):
+                edge =(shortest_path[i], shortest_path[i+1])
+
+
+                if edge in edge_pattern_set:
+                    edge_appearance_dict[edge] += 1
+                else:
+                    edge_pattern_set.add(edge)
+                    edge_appearance_dict[edge] = 1
+
+        max_num_used = max(edge_appearance_dict.values())
+
+        # edge_used_num_dict = {
+        #     num_used: {
+        #         edge_list: [],
+        #         num_of_edges: len(edge_list)
+        #     },
+        #     num_used: {
+        #         edge_list: [],
+        #         num_of_edges: len(edge_list)
+        #     },
+        #     ...
+        # }
+        edge_used_num_dict = dict()
+
+        for edge, num_used in edge_appearance_dict.items():
+            if num_used in edge_used_num_dict:
+                edge_used_num_dict[num_used]['edge_list'].append(edge)
+                edge_used_num_dict[num_used]['num_of_edges'] += 1
+            else:
+                edge_used_num_dict[num_used] = dict()
+                edge_used_num_dict[num_used]['edge_list'] = []
+                edge_used_num_dict[num_used]['edge_list'].append(edge)
+                edge_used_num_dict[num_used]['num_of_edges'] = 1
+
+        edge_used_num_dict = dict(sorted(edge_used_num_dict.items(), reverse=True))
+
+        return edge_used_num_dict
+
+    def add_different_color_edges_to_data(self, edge_list, data, index, class_size):
 
         edge_x = []
         edge_y = []
@@ -157,28 +214,44 @@ class PlotShortestPath(PlotFunc, InitNetwork):
             mode = 'lines',
             opacity = 0.7,
             line = dict(width = 3, color=color),
-            name = 'Number of times used' + str(max_num_used - index)
+            name = 'class' + str(class_size - index)
         )
 
         data.append(edges)
 
         return data
 
-    def add_shortest_path_edges_for_plotly(self, edge_appearance_list, data):
+    def add_shortest_path_edges_for_plotly(self, edge_used_num_dict, class_size, data):
 
-        max_num_used = len(edge_appearance_list)
+        class_width = math.ceil(list(edge_used_num_dict.keys())[0] / class_size)
 
-        print(max_num_used)
+        edge_lists = [list() for i in range(class_size)]
 
-        for index in range(max_num_used):
-            # edge_list = [(source, target), (source, target)]
-            edge_list = edge_appearance_list[index]
+        for num_used, val_dict in edge_used_num_dict.items():
 
-            print(index, len(edge_list))
+            index = math.ceil(num_used / class_width)
 
-            data = self.add_different_color_edges_to_data(edge_list, data, index, max_num_used)
+            edge_lists[- index] += val_dict['edge_list']
+
+        for index in range(class_size):
+            
+            edge_list = edge_lists[index]
+
+            data = self.add_different_color_edges_to_data(edge_list, data, index, class_size)
 
         return data
+
+    # def add_shortest_path_edges_for_plotly(self, edge_appearance_list, data):
+
+    #     max_num_used = len(edge_appearance_list)
+
+    #     for index in range(max_num_used):
+    #         # edge_list = [(source, target), (source, target)]
+    #         edge_list = edge_appearance_list[index]
+
+    #         data = self.add_different_color_edges_to_data(edge_list, data, index, max_num_used)
+
+    #     return data
 
     def make_shortest_path_list_from_csv(self):
 
@@ -198,7 +271,7 @@ class PlotShortestPath(PlotFunc, InitNetwork):
         dest_node_set = set()
         dest_node_set.add('912045522')
 
-        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=3, color='blue')
+        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='blue')
 
         data = [edges_for_plotly]
 
@@ -207,13 +280,16 @@ class PlotShortestPath(PlotFunc, InitNetwork):
         # shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522')
         shortest_path_list = self.make_shortest_path_list_from_csv()
 
-        edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
+        # edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
+        edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
 
-        data = self.add_shortest_path_edges_for_plotly(edge_appearance_list, data)
-        # data.append(nodes_for_plotly)
+        class_size = self.sturges_rule(edge_used_num_dict)
+
+        data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
+        # # data.append(nodes_for_plotly)
 
         data.append(dest_node_for_plotly)
-        title_text = 'shortest path to destination'
+        title_text = '緯度35.66以南の交差点から昭和記念公園までの最短経路'
         layout = self.return_base_layout(title_text)
         filename = 'results/images/html/shortest_path_to_dest_3.html'
 
@@ -232,18 +308,6 @@ class PlotShortestPath(PlotFunc, InitNetwork):
 
         self.plot(data, layout, filename)
 
-    def test_make_shortest_path_list(self):
-
-        source_node_set = set()
-        source_node_set.add("190197656")
-        source_node_set.add("190137876")
-
-        target_node = '912045522'
-
-        shortest_path_list = self.make_shortest_path_list(source_node_set, target_node)
-
-        print(shortest_path_list)
-
     def main(self):
 
         self.plot_shortest_path()
@@ -252,7 +316,27 @@ class PlotShortestPath(PlotFunc, InitNetwork):
 
 plot = PlotShortestPath()
 plot.main()
-# plot.make_shortest_path_list_from_csv()
-# plot.test_make_shortest_path_list()
 
+        # x_data = list(edge_used_num_dict.keys())
+        # x_data.reverse()
+        # x_data = np.array(x_data)
 
+        # y_data = []
+        # for data in edge_used_num_dict.values():
+        #     y_data.append(len(data['edge_list']))
+        # y_data.reverse()
+        # y_data = np.array(y_data)
+
+        # self.plot_line_graph(x_data, y_data)
+
+    # def test_make_shortest_path_list(self):
+
+    #     source_node_set = set()
+    #     source_node_set.add("190197656")
+    #     source_node_set.add("190137876")
+
+    #     target_node = '912045522'
+
+    #     shortest_path_list = self.make_shortest_path_list(source_node_set, target_node)
+
+    #     print(shortest_path_list)

@@ -54,11 +54,11 @@ class Centrality(PlotFunc, InitNetwork):
         return centrality_dict
 
     # 中心性の値の幅に基づいてスタージェスの公式から階級の数を求める
-    def sturges_rule(self, centrality_dict):
+    def sturges_rule(self, dict):
 
-        centrality_dict = np.asarray(list(centrality_dict.values()))
+        dict = np.asarray(list(dict.values()))
 
-        class_size = int(np.log2(centrality_dict.size).round()) + 1
+        class_size = int(np.log2(dict.size).round()) + 1
 
         return class_size
     
