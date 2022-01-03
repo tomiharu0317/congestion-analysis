@@ -1,40 +1,30 @@
+import pandas as pd
 import networkx as nx
 from networkx.classes.function import edges
 from networkx.readwrite.graph6 import data_to_n
 import plotly.graph_objects as go
 import plotly.express as px
 from initnetwork import InitNetwork
-from plotroadnet import PlotNetwork
-from centrality import Centrality
-
-class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
+from plot import PlotFunc
+class PlotShortestPath(PlotFunc, InitNetwork):
 
     initnet = InitNetwork()
-    plotnet = PlotNetwork()
-    centrality = Centrality()
 
     def __init__(self):
         self.node_data_dict = dict(self.G.nodes.data())
         self.initnet.__init__()
 
-    def make_motorway_nodes_for_plotly(self, motorway_node_set):
+    # latitudeが35.66以下のノードからスタートする
+    # attributes name: y
+    def retrieve_start_nodes(self):
+
+        node_set = set()
         
-        node_x = []
-        node_y = []
+        for node, data_dict in self.node_data_dict.items():
+            if float(data_dict['y']) <= float(35.66):
+                node_set.add(node)
 
-        for node in motorway_node_set:
-            node_x.append(self.retrieve_coordinate(node)[0]) 
-            node_y.append(self.retrieve_coordinate(node)[1])
-
-        nodes = go.Scatter(
-            showlegend=False,
-            x=node_x,
-            y=node_y,
-            mode='markers',
-            marker=dict(size=3, color='blue')
-        )
-
-        return nodes
+        return node_set
 
     def retrieve_motorway_nodes(self):
 
@@ -57,39 +47,11 @@ class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
         # '260715011', '308923338', '260715112'}
         return motorway_node_set
 
-
-    def plot_motorway(self):
-
-        motorway_node_set = self.retrieve_motorway_nodes()
-
-        edges_for_plotly = self.make_edges_for_plotly()
-        nodes_for_plotly = self.make_motorway_nodes_for_plotly(motorway_node_set)
-
-        data = [edges_for_plotly, nodes_for_plotly]
-
-        layout = go.Layout(
-            title = dict(
-                text = 'Motorway nodes',
-                font = dict(size=20, color='gray'),
-            ),
-            showlegend=False,
-            xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
-            yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
-            plot_bgcolor='white',
-            width=800,
-            height=600
-        )
-
-
-        fig = go.Figure(data, layout)
-        fig.write_html('results/images/html/motorway_nodes.html', auto_open=True)
-
+    # 多対一の最短経路リスト取得関数
     # 中央自動車道の出口から昭和記念公園入口までの最短経路を算出
-    def make_shortest_path_list(self):
+    def make_shortest_path_list(self, source_node_set, target_node):
 
         shortest_path_list = []
-
-        source_node_set = self.retrieve_motorway_nodes()
 
         # dest: 昭和記念公園立川口
         # <node id="912045522">
@@ -98,9 +60,9 @@ class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
         #     <data key="d6">3</data>
         # </node>
         # dest = [139.4056977, 35.701684]
-        target_node = "912045522"
 
         for source_node in source_node_set:
+            print(source_node)
 
             try: 
                 shortest_path = nx.dijkstra_path(self.G, source_node, target_node, weight='length')
@@ -111,6 +73,20 @@ class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
                 print(source_node, e)
                 continue
 
+        # shortest path list をcsvに保存
+        try: 
+            n = len(shortest_path_list)
+
+            for i in range(n):
+                shortest_path_list[i] = '-'.join(shortest_path_list[i])
+        
+            shortest_path_dict = {'shortest_path': shortest_path_list}
+            df = pd.DataFrame(shortest_path_dict)
+            df.to_csv('results/shortest_path_to_dest.csv')
+    
+        except Exception as e:
+            print(e)
+
         return shortest_path_list
 
     # 同じ経路を通るほどその道路の色を濃くする
@@ -119,7 +95,7 @@ class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
 
         # all pattern of edges
         # {(source, target), (source, target)}
-        edge_pattern_list = set()
+        edge_pattern_set = set()
 
         # edge_appearance_dict = {(source, target): num_of_appearance}
         edge_appearance_dict = dict()
@@ -132,39 +108,21 @@ class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
                 edge =(shortest_path[i], shortest_path[i+1])
 
 
-                if edge in edge_pattern_list:
+                if edge in edge_pattern_set:
                     edge_appearance_dict[edge] += 1
                 else:
-                    edge_pattern_list.add(edge)
+                    edge_pattern_set.add(edge)
                     edge_appearance_dict[edge] = 1
 
-        max_appearance = max(edge_appearance_dict.values())
+        max_num_used = max(edge_appearance_dict.values())
 
         # indexがappearanceの数に対応（降順）
-        edge_appearance_list = [list() for i in range(max_appearance)]
+        edge_appearance_list = [list() for i in range(max_num_used)]
 
         for edge, appearance in edge_appearance_dict.items():
             edge_appearance_list[-appearance].append(edge)
 
         return edge_appearance_list
-
-    def make_dest_node_for_plotly(self):
-
-        node_x = []
-        node_y = []
-
-        node_x.append(self.retrieve_coordinate("912045522")[0]) 
-        node_y.append(self.retrieve_coordinate("912045522")[1])
-
-        nodes = go.Scatter(
-            x=node_x,
-            y=node_y,
-            mode='markers',
-            marker=dict(size=3, color='blue'),
-            showlegend=False,
-        )
-
-        return nodes
 
     def add_different_color_edges_to_data(self, edge_list, data, index, max_num_used):
 
@@ -176,8 +134,8 @@ class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
             source = edge[0]
             target = edge[1]
 
-            source_coordinate = self.plotnet.retrieve_coordinate(source)
-            target_coordinate = self.plotnet.retrieve_coordinate(target)
+            source_coordinate = self.retrieve_coordinate(source)
+            target_coordinate = self.retrieve_coordinate(target)
 
             # source node coordinate
             edge_x.append(source_coordinate[0])
@@ -191,7 +149,7 @@ class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
             edge_x.append(None)
             edge_y.append(None)
 
-        color = self.centrality.set_color(index)
+        color = self.set_color(index)
 
         edges = go.Scatter(
             x = edge_x,
@@ -210,57 +168,91 @@ class PlotShortestPath(Centrality, PlotNetwork, InitNetwork):
 
         max_num_used = len(edge_appearance_list)
 
+        print(max_num_used)
+
         for index in range(max_num_used):
             # edge_list = [(source, target), (source, target)]
             edge_list = edge_appearance_list[index]
+
+            print(index, len(edge_list))
 
             data = self.add_different_color_edges_to_data(edge_list, data, index, max_num_used)
 
         return data
 
-    def plot_shortest_path(self, edge_appearance_list):
+    def make_shortest_path_list_from_csv(self):
 
-        motorway_node_set = self.retrieve_motorway_nodes()
-        nodes_for_plotly = self.make_motorway_nodes_for_plotly(motorway_node_set)
+        df = pd.read_csv('results/shortest_path_to_dest.csv')
 
-        edges_for_plotly = self.make_edges_for_plotly()
-        
-        dest_node_for_plotly = self.make_dest_node_for_plotly()
+        shortest_path_list = list(df['shortest_path'])
+        shortest_path_list = [shortest_path.split('-') for shortest_path in shortest_path_list]
+
+        return shortest_path_list
+
+    def plot_shortest_path(self):
+
+        edges_for_plotly = self.whole_edges_for_plotly()
+
+        # motorway_node_set = self.retrieve_motorway_nodes()
+        # nodes_for_plotly = self.node_set_to_nodes_for_plotly(motorway_node_set)
+        dest_node_set = set()
+        dest_node_set.add('912045522')
+
+        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=3, color='blue')
 
         data = [edges_for_plotly]
 
+        start_node_set = self.retrieve_start_nodes()
+
+        # shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522')
+        shortest_path_list = self.make_shortest_path_list_from_csv()
+
+        edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
+
         data = self.add_shortest_path_edges_for_plotly(edge_appearance_list, data)
+        # data.append(nodes_for_plotly)
 
-        data.append(nodes_for_plotly)
         data.append(dest_node_for_plotly)
+        title_text = 'shortest path to destination'
+        layout = self.return_base_layout(title_text)
+        filename = 'results/images/html/shortest_path_to_dest_3.html'
 
-        layout = go.Layout(
-            title = dict(
-                text = 'shortest path to destination',
-                font = dict(size=20, color='gray'),
-            ),
-            # showlegend=False,
-            xaxis=dict(title='longitude', showline=True, linewidth=1, linecolor='lightgray'),
-            yaxis=dict(title='latitude', showline=True, linewidth=1, linecolor='lightgray'),
-            plot_bgcolor='white',
-            width=800,
-            height=600
-        )
+        self.plot(data, layout, filename)
 
-        fig = go.Figure(data, layout)
-        fig.write_html('results/images/html/shortest_path_to_dest_2.html', auto_open=True)
+    def plot_motorway(self):
+
+        motorway_node_set = self.retrieve_motorway_nodes()
+
+        edges_for_plotly = self.whole_edges_for_plotly()
+        nodes_for_plotly = self.node_set_to_nodes_for_plotly(motorway_node_set, size=3, color='blue')
+
+        data = [edges_for_plotly, nodes_for_plotly]
+        layout = self.return_base_layout()
+        filename = 'results/images/html/motorway_nodes.html'
+
+        self.plot(data, layout, filename)
+
+    def test_make_shortest_path_list(self):
+
+        source_node_set = set()
+        source_node_set.add("190197656")
+        source_node_set.add("190137876")
+
+        target_node = '912045522'
+
+        shortest_path_list = self.make_shortest_path_list(source_node_set, target_node)
+
+        print(shortest_path_list)
 
     def main(self):
 
-        shortest_path_list = self.make_shortest_path_list()
-
-        edge_appearance_list = self.make_edge_appearance_list(shortest_path_list)
-
-        self.plot_shortest_path(edge_appearance_list)
+        self.plot_shortest_path()
 
         return
 
 plot = PlotShortestPath()
 plot.main()
+# plot.make_shortest_path_list_from_csv()
+# plot.test_make_shortest_path_list()
 
 
