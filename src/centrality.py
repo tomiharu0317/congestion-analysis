@@ -11,12 +11,11 @@ import plotly.graph_objects as go
 import plotly.express as px
 import manipulatecsv
 from initnetwork import InitNetwork
-from plotroadnet import PlotNetwork
+from plot import PlotFunc
 
-class Centrality(PlotNetwork, InitNetwork):
+class Centrality(PlotFunc, InitNetwork):
 
     initnet = InitNetwork()
-    plotnet = PlotNetwork()
 
     node_data_dict = {}
 
@@ -55,34 +54,14 @@ class Centrality(PlotNetwork, InitNetwork):
         return centrality_dict
 
     # 中心性の値の幅に基づいてスタージェスの公式から階級の数を求める
-    def sturges_rule(self, centrality_dict):
+    def sturges_rule(self, dict):
 
-        centrality_dict = np.asarray(list(centrality_dict.values()))
+        dict = np.asarray(list(dict.values()))
 
-        class_size = int(np.log2(centrality_dict.size).round()) + 1
+        class_size = int(np.log2(dict.size).round()) + 1
 
         return class_size
     
-    # 中心性の値によって決定された階級に基づいて色を決定する
-    def set_color(self, index):
-
-        # color_list = px.colors.sequential.Mint
-        # color_list = px.colors.sequential.Plotly3
-        # color_list = px.colors.sequential.Teal
-        # color_list = ['#0508b8', '#1910d8', '#3c19f0', '#6b1cfb', '#981cfd', '#bf1cfd', '#dd2bfd', '#f246fe', '#fc67fd', '#fe88fc', '#fea5fd', '#febefe', '#fec3fe']
-        color_list = ['rgb(247,251,255)', 'rgb(222,235,247)', 'rgb(198,219,239)', 'rgb(158,202,225)', 'rgb(107,174,214)', 'rgb(66,146,198)', 'rgb(33,113,181)', 'rgb(8,81,156)', 'rgb(8,48,107)']
-
-        color_list.reverse()
-
-        n = len(color_list)
-
-        if index < n:
-            color = color_list[index]
-        else:
-            color = color_list[-1]
-
-        return color
-
     def make_different_color_nodes_for_plotly(self, node_list, plotly_data, color, index):
 
         node_x = []
@@ -90,8 +69,8 @@ class Centrality(PlotNetwork, InitNetwork):
 
         for node in node_list:
             node = node[0]
-            node_x.append(self.plotnet.retrieve_coordinate(node)[0])
-            node_y.append(self.plotnet.retrieve_coordinate(node)[1])
+            node_x.append(self.retrieve_coordinate(node)[0])
+            node_y.append(self.retrieve_coordinate(node)[1])
 
         nodes = go.Scatter(
             x=node_x,
@@ -150,7 +129,7 @@ class Centrality(PlotNetwork, InitNetwork):
     def plot_centrality(self, key):
 
         centrality_dict = self.return_centrality_dict(key)
-        edges_for_plotly = self.plotnet.make_edges_for_plotly()
+        edges_for_plotly = self.whole_edges_for_plotly()
         plotly_data = [edges_for_plotly]
 
         # centralityの値に基づいて降順にソート
