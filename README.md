@@ -132,6 +132,12 @@
 
 緯度 35.66 以南の 15850 個の交差点から昭和記念公園立川口への最短経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
 
+パターン 1
 ![shortest_path](results/images/shortest_path_to_dest_pattern2.png)
 
 ![shortest_path](results/images/shortest_path_to_dest_pattern2_zoom.png)
+
+パターン 2
+![shortest_path](results/images/shortest_path_to_dest_pattern1.png)
+
+![shortest_path](results/images/shortest_path_to_dest_pattern1_zoom.png)
