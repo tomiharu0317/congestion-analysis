@@ -93,42 +93,6 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
         return shortest_path_list
 
-    # FIXME: legacy code is here.
-    # 同じ経路を通るほどその道路の色を濃くする
-    # shortest_path_list: [[source, somenodes, target], [source, somenodes, target], ...]
-    def make_edge_appearance_list(self, shortest_path_list):
-
-        # all pattern of edges
-        # {(source, target), (source, target)}
-        edge_pattern_set = set()
-
-        # edge_appearance_dict = {(source, target): num_of_appearance}
-        edge_appearance_dict = dict()
-
-        # shortest_path: [source, some nodes, target]
-        for shortest_path in shortest_path_list:
-            n = len(shortest_path)
-
-            for i in range(n - 1):
-                edge =(shortest_path[i], shortest_path[i+1])
-
-
-                if edge in edge_pattern_set:
-                    edge_appearance_dict[edge] += 1
-                else:
-                    edge_pattern_set.add(edge)
-                    edge_appearance_dict[edge] = 1
-
-        max_num_used = max(edge_appearance_dict.values())
-
-        # indexがその道路が使われた回数に対応（降順）
-        edge_appearance_list = [list() for i in range(max_num_used)]
-
-        for edge, num_used in edge_appearance_dict.items():
-            edge_appearance_list[-num_used].append(edge)
-
-        return edge_appearance_list
-
     def make_edge_used_num_dict(self, shortest_path_list):
 
         # all pattern of edges
@@ -181,7 +145,7 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
         return edge_used_num_dict
 
-    def add_different_color_edges_to_data(self, edge_list, data, index, class_size):
+    def add_different_color_edges_to_data(self, edge_list, data, index, class_size, class_width):
 
         edge_x = []
         edge_y = []
@@ -214,7 +178,8 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
             mode = 'lines',
             opacity = 0.7,
             line = dict(width = 3, color=color),
-            name = 'class' + str(class_size - index)
+            # name = 'class' + str(class_size - index)
+            name = str((class_size - index - 1) * class_width) + '<x<=' + str((class_size - index) * class_width) 
         )
 
         data.append(edges)
@@ -237,21 +202,9 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
             
             edge_list = edge_lists[index]
 
-            data = self.add_different_color_edges_to_data(edge_list, data, index, class_size)
+            data = self.add_different_color_edges_to_data(edge_list, data, index, class_size, class_width)
 
         return data
-
-    # def add_shortest_path_edges_for_plotly(self, edge_appearance_list, data):
-
-    #     max_num_used = len(edge_appearance_list)
-
-    #     for index in range(max_num_used):
-    #         # edge_list = [(source, target), (source, target)]
-    #         edge_list = edge_appearance_list[index]
-
-    #         data = self.add_different_color_edges_to_data(edge_list, data, index, max_num_used)
-
-    #     return data
 
     def make_shortest_path_list_from_csv(self):
 
@@ -316,27 +269,3 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
 plot = PlotShortestPath()
 plot.main()
-
-        # x_data = list(edge_used_num_dict.keys())
-        # x_data.reverse()
-        # x_data = np.array(x_data)
-
-        # y_data = []
-        # for data in edge_used_num_dict.values():
-        #     y_data.append(len(data['edge_list']))
-        # y_data.reverse()
-        # y_data = np.array(y_data)
-
-        # self.plot_line_graph(x_data, y_data)
-
-    # def test_make_shortest_path_list(self):
-
-    #     source_node_set = set()
-    #     source_node_set.add("190197656")
-    #     source_node_set.add("190137876")
-
-    #     target_node = '912045522'
-
-    #     shortest_path_list = self.make_shortest_path_list(source_node_set, target_node)
-
-    #     print(shortest_path_list)
