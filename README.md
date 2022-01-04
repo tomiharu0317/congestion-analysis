@@ -132,12 +132,31 @@
 
 緯度 35.66 以南の 15850 個の交差点から昭和記念公園立川口への最短経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
 
-パターン 1
+重みを（交差点から交差点をつなぐ）道路の長さとして、ダイクストラ法を用いて重み（距離）が最小となる経路をあるノードから目的地への最短経路としてプロットした。
+
+道路が使われた回数に基づく配色はスタージェスの公式を用いて決定した。具体的には、$k$ を階級数、$N$ を道路の使用回数のパターン数（使用された回数が 1,3,5,10 ならばパターン数は 4)として以下のように計算する。
+
+$k = 1 + round(\log_2 N)$
+
+求められた階級数を用いて階級の幅$w$を
+
+$w = ceil(\frac{max\{道路の使用回数\}}{k})$
+
+として計算し、それぞれの階級に基づいて道路の色を決定した。
+
 ![shortest_path](results/images/shortest_path_to_dest_pattern2.png)
 
 ![shortest_path](results/images/shortest_path_to_dest_pattern2_zoom.png)
 
-パターン 2
-![shortest_path](results/images/shortest_path_to_dest_pattern1.png)
+### 中央自動車道から昭和記念公園までの最短時間経路
 
-![shortest_path](results/images/shortest_path_to_dest_pattern1_zoom.png)
+緯度 35.66 以南の 15850 個の交差点から昭和記念公園立川口への最短時間経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
+
+各道路を通過するのに要する時間は
+
+$所要時間(m/h) = \frac{道路の長さ(m)}{法定速度(km/h) * 1000}$
+
+で計算し、これを各道路（エッジ）の重みとした。ダイクストラ法を用いて重み（所要時間）が最小となる経路をあるノードから目的地への最短時間経路としてプロットした。
+
+![min_time_path](results/images/min_time_path_to_dest.png)
+![min_time_path](results/images/min_time_path_to_dest_zoom.png)

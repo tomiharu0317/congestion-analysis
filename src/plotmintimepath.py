@@ -101,7 +101,6 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         class_size = self.sturges_rule(edge_used_num_dict)
 
         data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
-        # # data.append(nodes_for_plotly)
 
         data.append(dest_node_for_plotly)
         title_text = '緯度35.66以南の交差点から昭和記念公園までの最短時間経路'
