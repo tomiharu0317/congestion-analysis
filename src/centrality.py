@@ -58,6 +58,9 @@ class Centrality(PlotFunc, InitNetwork):
 
         dict = np.asarray(list(dict.values()))
 
+        print(dict)
+        print(dict.size)
+
         class_size = int(np.log2(dict.size).round()) + 1
 
         return class_size
