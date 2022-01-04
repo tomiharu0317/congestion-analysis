@@ -18,6 +18,38 @@ class PlotMinTimePath(PlotFunc, InitNetwork):
         self.initnet.__init__()
 
     def shape_maxspeed(self, maxspeed):
+    # {"['30', '.30']", "['40', '30']", '30;40', '80', "['40', '50']",
+    # '100', '40', "['30', '20']", '60', "['60', '50']", "['100', '80']",
+    # "['60', '06']", "['20', '30']", "['40', '30;40']", "['40', '60']",
+    # '50', '20', '15', "['40', '100']", '30'}
+    # set(maxspeed_dict.values())
+
+        if maxspeed == "['30', '.30']":
+            maxspeed = 30
+        elif maxspeed == "['60', '06']":
+            maxspeed = 60
+        elif maxspeed == "['40', '30']":
+            maxspeed = 35
+        elif maxspeed == "['40', '50']":
+            maxspeed = 40
+        elif maxspeed == "['30', '20']":
+            maxspeed = 25
+        elif maxspeed == "['20', '30']":
+            maxspeed = 25
+        elif maxspeed == "['40', '60']":
+            maxspeed = 50
+        elif maxspeed == "['60', '50']":
+            maxspeed = 55
+        elif maxspeed == "['100', '80']":
+            maxspeed = 90
+        elif maxspeed == "['40', '100']":
+            maxspeed = 70
+        elif maxspeed == "['40', '30;40']":
+            maxspeed = 35
+        elif maxspeed == "30;40":
+            maxspeed = 35
+        else:
+            maxspeed = int(maxspeed)
 
         return maxspeed
 
@@ -32,18 +64,16 @@ class PlotMinTimePath(PlotFunc, InitNetwork):
         for edge, length in length_dict.items():
 
             if edge in maxspeed_defined_edges:
-                maxspeed = shape_maxspeed(maxspeed_dict[edge])
+                maxspeed = self.shape_maxspeed(maxspeed_dict[edge])
             else:
                 maxspeed = 40
-
-            required_time = float(length) / (maxspeed * 1000)
+            
+            # 時間単位:(分)
+            required_time = (float(length) / (maxspeed * 1000))*60
 
             required_time_dict[edge] = {'required_time': float(required_time)}
 
         nx.set_edge_attributes(self.G, required_time_dict)
-
-    def calc_required_time(self):
-        return
 
 
     def plot_min_time_path(self):
@@ -51,24 +81,3 @@ class PlotMinTimePath(PlotFunc, InitNetwork):
 
 plot = PlotMinTimePath()
 plot.add_required_time_attributes()
-
-# {"['30', '.30']", "['40', '30']", '30;40', '80', "['40', '50']",
-# '100', '40', "['30', '20']", '60', "['60', '50']", "['100', '80']",
-# "['60', '06']", "['20', '30']", "['40', '30;40']", "['40', '60']",
-# '50', '20', '15', "['40', '100']", '30'}
-# set(maxspeed_dict.values())
-
-# ['30', '.30'] -> '30'
-# ['60', '06']" -> '60'
-
-# ['40', '30'] -> '35'
-# ['40', '50'] -> '45'
-# ['30', '20'] -> '25'
-# ['20', '30'] -> '25'
-# ['40', '60'] -> '50'
-# ['60', '50'] -> '55'
-# ['100', '80'] -> '90'
-# ['40', '100'] -> '70'
-
-# '30;40' -> '35'
-# ['40', '30;40'] -> '35'
