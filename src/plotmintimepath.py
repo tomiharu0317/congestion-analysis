@@ -8,8 +8,9 @@ import plotly.express as px
 from initnetwork import InitNetwork
 from plot import PlotFunc
 from centrality import Centrality
+from plotshortestpath import PlotShortestPath
 
-class PlotMinTimePath(PlotFunc, InitNetwork):
+class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
     initnet = InitNetwork()
 
@@ -75,9 +76,45 @@ class PlotMinTimePath(PlotFunc, InitNetwork):
 
         nx.set_edge_attributes(self.G, required_time_dict)
 
-
     def plot_min_time_path(self):
+
+        self.add_required_time_attributes()
+
+        edges_for_plotly = self.whole_edges_for_plotly()
+
+        dest_node_set = set()
+        dest_node_set.add('912045522')
+        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='blue')
+
+        data = [edges_for_plotly]
+
+        start_node_set = self.retrieve_start_nodes()
+
+        shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'required_time')
+        # shortest_path_list = self.make_shortest_path_list_from_csv()
+
+        self.path_list_to_csv(shortest_path_list, 'min_time_path', 'results/min_time_path_to_dest.csv')
+
+        # edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
+        edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
+
+        class_size = self.sturges_rule(edge_used_num_dict)
+
+        data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
+        # # data.append(nodes_for_plotly)
+
+        data.append(dest_node_for_plotly)
+        title_text = '緯度35.66以南の交差点から昭和記念公園までの最短時間経路'
+        layout = self.return_base_layout(title_text)
+        filename = 'results/images/html/min_time_path_to_dest.html'
+
+        self.plot(data, layout, filename)
+
+    def main(self):
+
+        self.plot_min_time_path()
+
         return
 
 plot = PlotMinTimePath()
-plot.add_required_time_attributes()
+plot.main()

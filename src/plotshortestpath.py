@@ -51,9 +51,26 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         # '260715011', '308923338', '260715112'}
         return motorway_node_set
 
+    def path_list_to_csv(self, path_list, header, filename):
+
+        # shortest path list をcsvに保存
+        try: 
+            n = len(path_list)
+            path_list_to_csv = [list() for i in range(n)]
+
+            for i in range(n):
+                path_list_to_csv[i] = '-'.join(path_list[i])
+        
+            path_dict = {header: path_list_to_csv}
+            df = pd.DataFrame(path_dict)
+            df.to_csv(filename)
+    
+        except Exception as e:
+            print(e)
+
     # 多対一の最短経路リスト取得関数
     # 中央自動車道の出口から昭和記念公園入口までの最短経路を算出
-    def make_shortest_path_list(self, source_node_set, target_node):
+    def make_shortest_path_list(self, source_node_set, target_node, weight):
 
         shortest_path_list = []
 
@@ -69,7 +86,7 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
             print(source_node)
 
             try: 
-                shortest_path = nx.dijkstra_path(self.G, source_node, target_node, weight='length')
+                shortest_path = nx.dijkstra_path(self.G, source_node, target_node, weight=weight)
                 shortest_path_list.append(shortest_path)
             except Exception as e:
                 # "270617457" No path to 912045522.
@@ -77,19 +94,6 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
                 print(source_node, e)
                 continue
 
-        # shortest path list をcsvに保存
-        try: 
-            n = len(shortest_path_list)
-
-            for i in range(n):
-                shortest_path_list[i] = '-'.join(shortest_path_list[i])
-        
-            shortest_path_dict = {'shortest_path': shortest_path_list}
-            df = pd.DataFrame(shortest_path_dict)
-            df.to_csv('results/shortest_path_to_dest.csv')
-    
-        except Exception as e:
-            print(e)
 
         return shortest_path_list
 
@@ -115,8 +119,6 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
                 else:
                     edge_pattern_set.add(edge)
                     edge_appearance_dict[edge] = 1
-
-        max_num_used = max(edge_appearance_dict.values())
 
         # edge_used_num_dict = {
         #     num_used: {
@@ -219,8 +221,6 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
         edges_for_plotly = self.whole_edges_for_plotly()
 
-        # motorway_node_set = self.retrieve_motorway_nodes()
-        # nodes_for_plotly = self.node_set_to_nodes_for_plotly(motorway_node_set)
         dest_node_set = set()
         dest_node_set.add('912045522')
 
@@ -230,8 +230,10 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
         start_node_set = self.retrieve_start_nodes()
 
-        # shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522')
-        shortest_path_list = self.make_shortest_path_list_from_csv()
+        shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'length')
+        # shortest_path_list = self.make_shortest_path_list_from_csv()
+
+        self.path_list_to_csv(shortest_path_list, 'shortest_path', 'results/shortest_path_to_dest.csv')
 
         # edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
         edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
@@ -239,7 +241,6 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         class_size = self.sturges_rule(edge_used_num_dict)
 
         data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
-        # # data.append(nodes_for_plotly)
 
         data.append(dest_node_for_plotly)
         title_text = '緯度35.66以南の交差点から昭和記念公園までの最短経路'
