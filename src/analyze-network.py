@@ -20,7 +20,7 @@ import japanize_matplotlib
 import plotly.graph_objects as go
 import plotly.express as px
 import manipulatecsv
-from plotroadnet import PlotNetwork
+from plotroadnet import PlotFunc
 
 # sample node
 # ["190137856"]["190137876"]
@@ -37,10 +37,9 @@ from plotroadnet import PlotNetwork
 # クラスター係数
 # 平均クラスター係数
 # -----------------------------------------------------
-class AnalyzeNetwork(PlotNetwork, InitNetwork):
+class AnalyzeNetwork(PlotFunc, InitNetwork):
 
     initnet = InitNetwork()
-    plotnet = PlotNetwork()
     filename = 'results/basic_feature_value.csv'
 
     def __init__(self):
@@ -56,7 +55,9 @@ class AnalyzeNetwork(PlotNetwork, InitNetwork):
     def num_of_nodes(self):
         key = 'num_of_nodes'
         value = nx.number_of_nodes(self.G)
-        manipulatecsv.write_to_csv(key, value, self.filename) 
+
+        print(value)
+        # manipulatecsv.write_to_csv(key, value, self.filename) 
 
     # number of edges : 10515
     def num_of_edges(self):
@@ -270,3 +271,6 @@ class AnalyzeNetwork(PlotNetwork, InitNetwork):
         avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'),5)
 
         manipulatecsv.write_to_csv(key, avg_cluster_coefficient, self.filename)
+
+analyze = AnalyzeNetwork()
+analyze.num_of_nodes()

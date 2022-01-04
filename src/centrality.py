@@ -58,9 +58,6 @@ class Centrality(PlotFunc, InitNetwork):
 
         dict = np.asarray(list(dict.values()))
 
-        print(dict)
-        print(dict.size)
-
         class_size = int(np.log2(dict.size).round()) + 1
 
         return class_size
@@ -79,7 +76,7 @@ class Centrality(PlotFunc, InitNetwork):
             x=node_x,
             y=node_y,
             mode='markers',
-            marker=dict(size=5,  color=color),
+            marker=dict(size=2,  color=color),
             name='class' + str(index + 1)
         )
 
@@ -176,6 +173,12 @@ class Centrality(PlotFunc, InitNetwork):
             height=600
         )
 
-        filename = 'results/images/html/' + key + '.html'
+        filename = 'results/centrality/html/' + key + '.html'
         fig = go.Figure(plotly_data, layout)
         fig.write_html(filename, auto_open=True)
+
+cent = Centrality()
+key_li = ['closeness_centrality', 'pagerank']
+for key in key_li:
+    print(key)
+    cent.plot_centrality(key)
