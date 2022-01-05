@@ -270,6 +270,3 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         self.plot_shortest_path()
 
         return
-
-plot = PlotShortestPath()
-plot.main()
