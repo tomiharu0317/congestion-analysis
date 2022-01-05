@@ -56,8 +56,7 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         key = 'num_of_nodes'
         value = nx.number_of_nodes(self.G)
 
-        print(value)
-        # manipulatecsv.write_to_csv(key, value, self.filename) 
+        manipulatecsv.write_to_csv(key, value, self.filename) 
 
     # number of edges : 10515
     def num_of_edges(self):
@@ -81,14 +80,14 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         fig, ax = plt.subplots()
         rects = ax.bar(x, degree_hist, width)
 
-        ax.set_title('立川市自動車道ネットワークにおける次数のヒストグラム')
+        ax.set_title('指定範囲自動車道ネットワークにおける次数のヒストグラム')
         ax.set_xlabel('次数' + r'$k$')
         ax.set_ylabel(r'$n(k)$')
 
         ax.bar_label(rects)
 
         fig.tight_layout()
-        fig.savefig('results/images/degree_hist.jpg')
+        fig.savefig('results/target_region/images/degree_hist.jpg')
 
     # degree distribution --------------------------------------------------------------------
 
@@ -105,14 +104,14 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         fig, ax = plt.subplots()
         rects = ax.bar(x, degree_dist, width)
 
-        ax.set_title('立川市自動車道ネットワークにおける次数分布')
+        ax.set_title('指定範囲自動車道ネットワークにおける次数分布')
         ax.set_xlabel('次数' + r'$k$')
         ax.set_ylabel(r'$P(k)$')
 
         ax.bar_label(rects)
 
         fig.tight_layout()
-        fig.savefig('results/images/degree_dist.jpg')
+        fig.savefig('results/target_region/images/degree_dist.jpg')
 
 
     def make_degree_dist(self):
@@ -244,7 +243,7 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
     # density ------------------------------------------------------------------------------------
     def calc_density(self):
         key = 'density'
-        density_val = round(nx.density(self.G), 6)
+        density_val = nx.density(self.G)
 
         manipulatecsv.write_to_csv(key, density_val, self.filename)
 
@@ -268,9 +267,6 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         #     if edge not in G2_edges:
         #         print(edge)
 
-        avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'),5)
+        avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'), 7)
 
         manipulatecsv.write_to_csv(key, avg_cluster_coefficient, self.filename)
-
-analyze = AnalyzeNetwork()
-analyze.num_of_nodes()
