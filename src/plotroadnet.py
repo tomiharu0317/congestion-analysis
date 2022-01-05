@@ -53,3 +53,80 @@ class PlotNetwork(PlotFunc, InitNetwork):
 
         fig = go.Figure(data, layout)
         fig.write_html(filename, auto_open=True)
+
+    def plot_koushu_kaidou(self):
+
+        road_name_dict = nx.get_edge_attributes(self.G, 'name')
+
+        koushu_kaidou_edge_set = set()
+
+        for edge, name in road_name_dict.items():
+            if name == '甲州街道' or '甲州街道' in name:
+                source = edge[0]
+                target = edge[1]
+
+                edge = (source, target)
+
+                koushu_kaidou_edge_set.add(edge)
+
+        koushu_kaidou_edges_for_plotly = self.edge_set_to_edges_for_plotly(koushu_kaidou_edge_set, 5, 'red')
+
+        edges_for_plotly = self.whole_edges_for_plotly()
+
+        data = [edges_for_plotly, koushu_kaidou_edges_for_plotly]
+
+        title_text = '甲州街道'
+        layout = self.return_base_layout(title_text)
+        filename = 'results/target_region/html/kokushu_kaidou.html'
+
+        self.plot(data, layout, filename)
+
+        return
+
+    def plot_chuo_expressway(self):
+
+        road_name_dict = nx.get_edge_attributes(self.G, 'name')
+
+        chuo_expressway_edge_set = set()
+
+        for edge, name in road_name_dict.items():
+            if name == '中央自動車道' or '中央自動車道' in name:
+                source = edge[0]
+                target = edge[1]
+
+                edge = (source, target)
+
+                chuo_expressway_edge_set.add(edge)
+
+        chuo_expressway_edges_for_plotly = self.edge_set_to_edges_for_plotly(chuo_expressway_edge_set, 5, 'red')
+
+        edges_for_plotly = self.whole_edges_for_plotly()
+
+        data = [edges_for_plotly, chuo_expressway_edges_for_plotly]
+
+        title_text = '中央自動車道'
+        layout = self.return_base_layout(title_text)
+        filename = 'results/target_region/html/chuo_expressway.html'
+
+        self.plot(data, layout, filename)
+
+        return
+
+    def plot_dest(self):
+
+        edges_for_plotly = self.whole_edges_for_plotly()
+
+        dest_node_set = set()
+        dest_node_set.add('912045522')
+
+        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=8, color='red')
+
+        data = [edges_for_plotly, dest_node_for_plotly]
+
+        title_text = '昭和記念公園立川口'
+        layout = self.return_base_layout(title_text)
+        filename = 'results/target_region/html/destination.html'
+
+        self.plot(data, layout, filename)
+
+        return

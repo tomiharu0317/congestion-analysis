@@ -9,7 +9,7 @@ from networkx.algorithms.centrality.degree_alg import in_degree_centrality
 from networkx.algorithms.centrality.eigenvector import eigenvector_centrality
 from networkx.algorithms.distance_measures import diameter
 from networkx.algorithms.shortest_paths import weighted
-from networkx.classes.function import density, edges
+from networkx.classes.function import density, edges, number_of_edges
 from networkx.drawing import layout
 from networkx.readwrite.graph6 import data_to_n
 import numpy as np
@@ -270,3 +270,91 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'), 7)
 
         manipulatecsv.write_to_csv(key, avg_cluster_coefficient, self.filename)
+
+    def calc_average_street_count(self):
+
+        key = 'average_street_count'
+
+        num_of_nodes = 0
+        degree_sum = 0
+
+        for node, data_dict in self.node_data_dict.items():
+
+            num_of_nodes += 1
+            degree_sum += int(data_dict['street_count'])
+        
+        average_street_count = round((degree_sum / num_of_nodes), 3)
+
+        manipulatecsv.write_to_csv(key, average_street_count, self.filename)
+
+    def make_steet_count_data(self):
+
+        degree_dict = dict()
+        degree_set = set()
+
+        for data_dict in self.node_data_dict.values():
+            
+            degree = int(data_dict['street_count'])
+
+            if degree in degree_dict:
+                degree_dict[degree] += 1
+            else:
+                degree_dict[degree] = 1
+                degree_set.add(degree)
+
+        return degree_dict, degree_set
+
+
+    def plot_street_count_hist(self):
+
+        degree_dict, degree_set = self.make_steet_count_data()
+
+        max_degree = max(degree_set)
+
+        x_data = range(1, max_degree + 1)
+        y_data = [0] * (max_degree)
+        width = 0.7
+
+        for x in x_data:
+            if x in degree_dict:
+                y_data[x - 1] = degree_dict[x]      
+                
+        fig, ax = plt.subplots()
+        rects = ax.bar(x_data, y_data, width)
+
+        ax.set_title('指定範囲自動車道ネットワークにおける次数のヒストグラム')
+        ax.set_xlabel('次数' + r'$k$')
+        ax.set_ylabel(r'$n(k)$')
+
+        ax.bar_label(rects)
+
+        fig.tight_layout()
+        fig.savefig('results/target_region/images/degree_hist_2.jpg')
+        
+
+    def plot_street_count_dist(self):
+
+        degree_dict, degree_set = self.make_steet_count_data()
+
+        num_of_nodes = nx.number_of_nodes(self.G)
+        max_degree = max(degree_set)
+
+        x_data = range(1, max_degree + 1)
+        y_data = [0] * (max_degree)
+        width = 0.7
+
+        for x in x_data:
+            if x in degree_dict:
+                y_data[x - 1] = float('{:.3f}'.format(degree_dict[x] / num_of_nodes))
+
+        fig, ax = plt.subplots()
+        rects = ax.bar(x_data, y_data, width)
+
+        ax.set_title('指定範囲自動車道ネットワークにおける次数分布')
+        ax.set_xlabel('次数' + r'$k$')
+        ax.set_ylabel(r'$P(k)$')
+
+        ax.bar_label(rects)
+
+        fig.tight_layout()
+        fig.savefig('results/target_region/images/degree_dist_2.jpg')

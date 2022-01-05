@@ -120,39 +120,11 @@
 - 東経：登戸駅(139.56954570683286)
 ```
 
-#### ノード（交差点）に含まれる情報
+![showa_kine_park](results/target_region/images/showa_kinen_park.png)
 
-```
-{
-    y: 緯度,
-    x: 経度,
-    highway: {
-        traffic signals: 信号機,
-        crossing: 横断歩道
-    },
-    street_count: 交差点が繋がる道路の数
-}
-```
+![showa_kine_park](results/target_region/images/chuo_expressway.png)
 
-#### エッジ（道路）に含まれる情報
-
-```
-{
-    osmid: Open Street Map 上の道路 ID,
-    name: 道路の名前,
-    highway: {
-        primary: 大きな街を結ぶ道路,
-        secondary: 町を結ぶ道路(primaryの次に重要),
-        tertiary: 小さい町や村を結ぶ道路(secondaryの次に重要),
-        unclassified: 村や村落を結ぶ道路(最も重要度の低い道路),
-        residential: 住宅沿いの道路,
-    },
-    oneway: 一方通行かどうか(True/False),
-    length: 道路の長さ,
-    lanes: 車線の数,
-    maxspeed: 最高時速,
-}
-```
+![showa_kine_park](results/target_region/images/koushu_kaidou.png)
 
 ## 分析方法
 
@@ -183,22 +155,21 @@
 
 ### 基本特徴量
 
-| 名前               | 値         |
-| ------------------ | ---------- |
-| 有向グラフ         | True       |
-| ノード数           | 71532      |
-| エッジ数           | 194969     |
-| 平均次数           | 5.45       |
-| 密度               | 3.8104e-05 |
-| 平均クラスター係数 | 0.000344   |
+| 名前       | 値         |
+| ---------- | ---------- |
+| 有向グラフ | True       |
+| ノード数   | 71532      |
+| エッジ数   | 194969     |
+| 平均次数   | 2.846      |
+| 密度       | 3.8104e-05 |
 
 ### 次数のヒストグラム
 
-![degree_hist](results/target_region/images/degree_hist.jpg)
+![degree_hist](results/target_region/images/degree_hist_2.jpg)
 
 ### 次数分布
 
-![degree_dist](results/target_region/images/degree_dist.jpg)
+![degree_dist](results/target_region/images/degree_dist_2.jpg)
 
 ### 中心性指標に基づくプロット
 
