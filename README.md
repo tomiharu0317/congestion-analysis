@@ -219,7 +219,7 @@
 
 ![eigenvector_centrality](results/target_region/images/eigenvector_centrality.png)
 
-### 中央自動車道から昭和記念公園までの最短経路
+### 昭和記念公園までの最短経路
 
 緯度 35.66 以南の 15850 個の交差点から昭和記念公園立川口への最短経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
 
@@ -239,7 +239,7 @@ w = ceil(max{道路の使用回数} / k)
 
 ![shortest_path](results/target_region/images/shortest_path_to_dest_pattern2_zoom.png)
 
-### 中央自動車道から昭和記念公園までの最短時間経路
+### 昭和記念公園までの最短時間経路
 
 緯度 35.66 以南の 15850 個の交差点から昭和記念公園立川口への最短時間経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
 
