@@ -270,12 +270,3 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         avg_cluster_coefficient = round(nx.average_clustering(G2, weight='length'), 7)
 
         manipulatecsv.write_to_csv(key, avg_cluster_coefficient, self.filename)
-
-analyze = AnalyzeNetwork()
-# analyze.num_of_nodes()
-# analyze.num_of_edges()
-# analyze.average_degree()
-analyze.calc_density()
-# analyze.calc_avg_cluster_coefficient()
-# analyze.plot_degree_hist()
-# analyze.plot_degree_dist()
