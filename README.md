@@ -21,6 +21,40 @@
 - `source`から`target`への向きをもつ edge が定義された`Digraph`
 - 2 つの node 間に 2 つの edge を持つ場合がある`MultiDigraph`
 
+#### ノード（交差点）に含まれる情報
+
+```
+{
+    y: 緯度,
+    x: 経度,
+    highway: {
+        traffic signals: 信号機,
+        crossing: 横断歩道
+    },
+    street_count: 交差点が繋がる道路の数
+}
+```
+
+#### エッジ（道路）に含まれる情報
+
+```
+{
+    osmid: Open Street Map 上の道路 ID,
+    name: 道路の名前,
+    highway: {
+        primary: 大きな街を結ぶ道路,
+        secondary: 町を結ぶ道路(primaryの次に重要),
+        tertiary: 小さい町や村を結ぶ道路(secondaryの次に重要),
+        unclassified: 村や村落を結ぶ道路(最も重要度の低い道路),
+        residential: 住宅沿いの道路,
+    },
+    oneway: 一方通行かどうか(True/False),
+    length: 道路の長さ,
+    lanes: 車線の数,
+    maxspeed: 最高時速,
+}
+```
+
 ### ネットワークの直径
 
 直径：ネットワーク内で最も遠いノード間の距離. ノード間の最短距離の中で最も大きい値
