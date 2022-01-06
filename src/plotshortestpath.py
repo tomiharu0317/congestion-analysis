@@ -25,7 +25,7 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         node_set = set()
         
         for node, data_dict in self.node_data_dict.items():
-            if float(data_dict['y']) <= float(35.66):
+            if float(data_dict['y']) <= float(35.665):
                 node_set.add(node)
 
         return node_set
@@ -213,9 +213,11 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
     def make_shortest_path_list_from_csv(self):
 
-        df = pd.read_csv('results/shortest_path_to_dest.csv')
+        # df = pd.read_csv('results/target_region_2/shortest_path_to_dest.csv')
+        df = pd.read_csv('results/target_region_2/min_time_path_to_dest.csv')
 
-        shortest_path_list = list(df['shortest_path'])
+        # shortest_path_list = list(df['shortest_ath'])
+        shortest_path_list = list(df['min_time_path'])
         shortest_path_list = [shortest_path.split('-') for shortest_path in shortest_path_list]
 
         return shortest_path_list
@@ -232,26 +234,26 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         data = [edges_for_plotly]
 
         start_node_set = self.retrieve_start_nodes()
-        start_node_for_plotly = self.node_set_to_nodes_for_plotly(start_node_set, size=4, color='red')
+        # start_node_for_plotly = self.node_set_to_nodes_for_plotly(start_node_set, size=4, color='red')
 
-        # shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'length')
+        shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'length')
         # shortest_path_list = self.make_shortest_path_list_from_csv()
 
-        # self.path_list_to_csv(shortest_path_list, 'shortest_path', 'results/shortest_path_to_dest.csv')
+        self.path_list_to_csv(shortest_path_list, 'shortest_path', 'results/target_region_2/shortest_path_to_dest.csv')
 
         # edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
-        # edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
+        edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
 
-        # class_size = self.sturges_rule(edge_used_num_dict)
+        class_size = self.sturges_rule(edge_used_num_dict)
 
-        # data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
+        data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
 
         data.append(dest_node_for_plotly)
-        data.append(start_node_for_plotly)
+        # data.append(start_node_for_plotly)
 
-        title_text = '目的地と出発地点'
+        title_text = '緯度35.665以南の交差点から目的地への最短経路'
         layout = self.return_base_layout(title_text)
-        filename = 'results/target_region/html/start_dest.html'
+        filename = 'results/target_region_2/html/start_dest.html'
 
         self.plot(data, layout, filename)
 
@@ -274,5 +276,5 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
         return
 
-plot = PlotShortestPath()
-plot.plot_shortest_path()
+# plot = PlotShortestPath()
+# plot.plot_shortest_path()

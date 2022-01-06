@@ -238,7 +238,7 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         )
 
         fig = go.Figure(data, layout)
-        fig.write_html('results/images/html/diameter.html', auto_open=True)
+        fig.write_html('results/target_region_2/html/diameter.html', auto_open=True)
         
     # density ------------------------------------------------------------------------------------
     def calc_density(self):
@@ -329,7 +329,7 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         ax.bar_label(rects)
 
         fig.tight_layout()
-        fig.savefig('results/target_region/images/degree_hist_2.jpg')
+        fig.savefig('results/target_region_2/images/degree_hist.jpg')
         
 
     def plot_street_count_dist(self):
@@ -357,4 +357,12 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         ax.bar_label(rects)
 
         fig.tight_layout()
-        fig.savefig('results/target_region/images/degree_dist_2.jpg')
+        fig.savefig('results/target_region_2/images/degree_dist.jpg')
+
+# analyze = AnalyzeNetwork()
+# analyze.num_of_nodes()
+# analyze.num_of_edges()
+# analyze.calc_density()
+# analyze.calc_average_street_count()
+# analyze.plot_street_count_hist()
+# analyze.plot_street_count_dist()

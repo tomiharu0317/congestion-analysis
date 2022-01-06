@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import random
 import plotly.graph_objects as go
 import plotly.express as px
 from initnetwork import InitNetwork
@@ -29,9 +30,15 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
             maxspeed = 30
         elif maxspeed == "['60', '06']":
             maxspeed = 60
+        elif maxspeed == "['06', '60']":
+            maxspeed = 60
         elif maxspeed == "['40', '30']":
             maxspeed = 35
+        elif maxspeed == "['30', '40']":
+            maxspeed = 35
         elif maxspeed == "['40', '50']":
+            maxspeed = 40
+        elif maxspeed == "['50', '40']":
             maxspeed = 40
         elif maxspeed == "['30', '20']":
             maxspeed = 25
@@ -44,6 +51,8 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         elif maxspeed == "['100', '80']":
             maxspeed = 90
         elif maxspeed == "['40', '100']":
+            maxspeed = 70
+        elif maxspeed == "['100', '40']":
             maxspeed = 70
         elif maxspeed == "['40', '30;40']":
             maxspeed = 35
@@ -59,7 +68,7 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         
         maxspeed_dict = nx.get_edge_attributes(self.G, name='maxspeed')
         maxspeed_defined_edges = set(maxspeed_dict.keys())
-        
+
         length_dict = nx.get_edge_attributes(self.G, name='length')
 
         for edge, length in length_dict.items():
@@ -67,14 +76,34 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
             if edge in maxspeed_defined_edges:
                 maxspeed = self.shape_maxspeed(maxspeed_dict[edge])
             else:
-                maxspeed = 40
+                maxspeed = 20
             
             # 時間単位:(分)
-            required_time = (float(length) / (maxspeed * 1000))*60
+            required_time = (float(length) / (maxspeed * 1000))
 
             required_time_dict[edge] = {'required_time': float(required_time)}
 
         nx.set_edge_attributes(self.G, required_time_dict)
+
+    def retrieve_start_nodes_randomly(self):
+
+        node_set = set()
+
+        node_list = list(self.G.nodes())
+        num_of_nodes = len(node_list)
+
+        node_num = 6000
+        node_count = 0
+
+        while node_count < node_num:
+            index = random.randint(0, num_of_nodes - 1)
+            node = node_list[index]
+
+            if node not in node_set and node != '912045522':
+                node_count += 1
+                node_set.add(node)
+
+        return node_set
 
     def plot_min_time_path(self):
 
@@ -88,14 +117,15 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
         data = [edges_for_plotly]
 
-        start_node_set = self.retrieve_start_nodes()
+        # start_node_set = self.retrieve_start_nodes()
+        start_node_set = self.retrieve_start_nodes_randomly()
+
 
         shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'required_time')
         # shortest_path_list = self.make_shortest_path_list_from_csv()
 
-        self.path_list_to_csv(shortest_path_list, 'min_time_path', 'results/min_time_path_to_dest.csv')
+        self.path_list_to_csv(shortest_path_list, 'min_time_path', 'results/target_region_2/min_time_path_to_dest_random.csv')
 
-        # edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
         edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
 
         class_size = self.sturges_rule(edge_used_num_dict)
@@ -103,9 +133,9 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
 
         data.append(dest_node_for_plotly)
-        title_text = '緯度35.66以南の交差点から昭和記念公園までの最短時間経路'
+        title_text = '昭和記念公園までの最短時間経路'
         layout = self.return_base_layout(title_text)
-        filename = 'results/images/html/min_time_path_to_dest.html'
+        filename = 'results/target_region_2/html/min_time_path_to_dest_random.html'
 
         self.plot(data, layout, filename)
 

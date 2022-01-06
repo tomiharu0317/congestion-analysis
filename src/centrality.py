@@ -173,6 +173,13 @@ class Centrality(PlotFunc, InitNetwork):
             height=600
         )
 
-        filename = 'results/centrality/html/' + key + '.html'
+        filename = 'results/target_region_2/html/' + key + '.html'
         fig = go.Figure(plotly_data, layout)
         fig.write_html(filename, auto_open=True)
+
+# cent = Centrality()
+# keyli = ['in_degree_centrality', 'out_degree_centrality', 'eigenvector_centrality']
+# for key in keyli:
+#     print(key)
+#     cent.plot_centrality(key)
+# cent.plot_centrality('closeness_centrality')
