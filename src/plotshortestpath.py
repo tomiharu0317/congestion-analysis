@@ -222,35 +222,38 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
     def plot_shortest_path(self):
 
-        # edges_for_plotly = self.whole_edges_for_plotly()
+        edges_for_plotly = self.whole_edges_for_plotly()
 
-        # dest_node_set = set()
-        # dest_node_set.add('912045522')
+        dest_node_set = set()
+        dest_node_set.add('912045522')
 
-        # dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='blue')
+        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='red')
 
-        # data = [edges_for_plotly]
+        data = [edges_for_plotly]
 
-        # start_node_set = self.retrieve_start_nodes()
+        start_node_set = self.retrieve_start_nodes()
+        start_node_for_plotly = self.node_set_to_nodes_for_plotly(start_node_set, size=4, color='red')
 
         # shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'length')
-        shortest_path_list = self.make_shortest_path_list_from_csv()
+        # shortest_path_list = self.make_shortest_path_list_from_csv()
 
         # self.path_list_to_csv(shortest_path_list, 'shortest_path', 'results/shortest_path_to_dest.csv')
 
         # edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
-        edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
+        # edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
 
-        class_size = self.sturges_rule(edge_used_num_dict)
+        # class_size = self.sturges_rule(edge_used_num_dict)
 
         # data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
 
-        # data.append(dest_node_for_plotly)
-        # title_text = '緯度35.66以南の交差点から昭和記念公園までの最短経路'
-        # layout = self.return_base_layout(title_text)
-        # filename = 'results/images/html/shortest_path_to_dest_3.html'
+        data.append(dest_node_for_plotly)
+        data.append(start_node_for_plotly)
 
-        # self.plot(data, layout, filename)
+        title_text = '目的地と出発地点'
+        layout = self.return_base_layout(title_text)
+        filename = 'results/target_region/html/start_dest.html'
+
+        self.plot(data, layout, filename)
 
     def plot_motorway(self):
 
@@ -270,3 +273,6 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         self.plot_shortest_path()
 
         return
+
+plot = PlotShortestPath()
+plot.plot_shortest_path()

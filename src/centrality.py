@@ -176,9 +176,3 @@ class Centrality(PlotFunc, InitNetwork):
         filename = 'results/centrality/html/' + key + '.html'
         fig = go.Figure(plotly_data, layout)
         fig.write_html(filename, auto_open=True)
-
-cent = Centrality()
-key_li = ['closeness_centrality', 'pagerank']
-for key in key_li:
-    print(key)
-    cent.plot_centrality(key)
