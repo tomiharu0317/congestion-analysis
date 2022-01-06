@@ -31,12 +31,17 @@ class PlotNetwork(PlotFunc, InitNetwork):
         if code == 1:
             data = [edges_for_plotly, nodes_for_plotly]
             title_text = 'Road Network in Tachikawa'
-            filename = 'results/images/html/tachikawa.html'
+            filename = 'results/tachikawa/html/tachikawa.html'
 
-        else:
+        elif code == 2:
             data = [edges_for_plotly]
             title_text = 'Road Network in target region'
-            filename = 'results/images/html/target_region.html'
+            filename = 'results/target_region/html/target_region.html'
+
+        else :
+            data = [edges_for_plotly]
+            title_text = 'Road Network in target region'
+            filename = 'results/target_region_2/html/target_region_2.html'
 
         layout = go.Layout(
             title = dict(
@@ -77,7 +82,7 @@ class PlotNetwork(PlotFunc, InitNetwork):
 
         title_text = '甲州街道'
         layout = self.return_base_layout(title_text)
-        filename = 'results/target_region/html/kokushu_kaidou.html'
+        filename = 'results/target_region_2/html/kokushu_kaidou.html'
 
         self.plot(data, layout, filename)
 
@@ -106,7 +111,7 @@ class PlotNetwork(PlotFunc, InitNetwork):
 
         title_text = '中央自動車道'
         layout = self.return_base_layout(title_text)
-        filename = 'results/target_region/html/chuo_expressway.html'
+        filename = 'results/target_region_2/html/chuo_expressway.html'
 
         self.plot(data, layout, filename)
 
@@ -125,8 +130,14 @@ class PlotNetwork(PlotFunc, InitNetwork):
 
         title_text = '昭和記念公園立川口'
         layout = self.return_base_layout(title_text)
-        filename = 'results/target_region/html/destination.html'
+        filename = 'results/target_region_2/html/destination.html'
 
         self.plot(data, layout, filename)
 
         return
+
+# plotnet = PlotNetwork()
+# plotnet.plot_road_network(3)
+# plotnet.plot_dest()
+# plotnet.plot_chuo_expressway()
+# plotnet.plot_koushu_kaidou()
