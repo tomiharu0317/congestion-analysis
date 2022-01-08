@@ -63,6 +63,9 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
         return maxspeed
 
+    def add_road(self, source_id, target_id, length, maxspeed):
+        self.G.add_edge(source_id, target_id, length=length, maxspeed=maxspeed)
+
     def add_required_time_attributes(self):
         required_time_dict = dict()
         
@@ -107,6 +110,12 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
     def plot_min_time_path(self):
 
+        node_li = ['921406627', '285331253']
+        source = node_li[0]
+        target = node_li[1]
+        self.add_road(source, target, length='200', maxspeed='50')
+        self.add_road(target, source, length='200', maxspeed='50')
+
         self.add_required_time_attributes()
 
         edges_for_plotly = self.whole_edges_for_plotly()
@@ -117,14 +126,13 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
         data = [edges_for_plotly]
 
-        # start_node_set = self.retrieve_start_nodes()
-        start_node_set = self.retrieve_start_nodes_randomly()
-
+        start_node_set = self.retrieve_start_nodes()
+        # start_node_set = self.retrieve_start_nodes_randomly()
 
         shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'required_time')
-        # shortest_path_list = self.make_shortest_path_list_from_csv()
+        # shortest_path_list = self.make_shortest_path_list_from_csv('results/target_region_2/min_time_path_to_dest_newroad_40.csv')
 
-        self.path_list_to_csv(shortest_path_list, 'min_time_path', 'results/target_region_2/min_time_path_to_dest_random.csv')
+        self.path_list_to_csv(shortest_path_list, 'min_time_path', 'results/target_region_2/min_time_path_to_dest_newroad_50.csv')
 
         edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
 
@@ -133,9 +141,9 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
 
         data.append(dest_node_for_plotly)
-        title_text = '昭和記念公園までの最短時間経路'
+        title_text = '新しい道路(50km/h)を追加した場合の昭和記念公園までの最短時間経路'
         layout = self.return_base_layout(title_text)
-        filename = 'results/target_region_2/html/min_time_path_to_dest_random.html'
+        filename = 'results/target_region_2/html/min_time_path_to_dest_newroad_50.html'
 
         self.plot(data, layout, filename)
 

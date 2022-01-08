@@ -211,10 +211,10 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
         return data
 
-    def make_shortest_path_list_from_csv(self):
+    def make_shortest_path_list_from_csv(self, filename):
 
         # df = pd.read_csv('results/target_region_2/shortest_path_to_dest.csv')
-        df = pd.read_csv('results/target_region_2/min_time_path_to_dest.csv')
+        df = pd.read_csv(filename)
 
         # shortest_path_list = list(df['shortest_ath'])
         shortest_path_list = list(df['min_time_path'])
@@ -224,11 +224,16 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
     def plot_shortest_path(self):
 
+        node_li = ['921406627', '285331253']
+        source = node_li[0]
+        target = node_li[1]
+
+        self.add_road(source, target)
+
         edges_for_plotly = self.whole_edges_for_plotly()
 
         dest_node_set = set()
-        dest_node_set.add('912045522')
-
+        dest_node_set.add('91204522')
         dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='red')
 
         data = [edges_for_plotly]
@@ -249,11 +254,20 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
 
         data.append(dest_node_for_plotly)
-        # data.append(start_node_for_plotly)
+        # # data.append(start_node_for_plotly)
 
-        title_text = '緯度35.665以南の交差点から目的地への最短経路'
+        # for node in node_li:
+
+        #     dest_node_set = set()
+        #     dest_node_set.add(node)
+
+        #     dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='red')
+
+        #     data.append(dest_node_for_plotly)
+
+        title_text = '新しい道路'
         layout = self.return_base_layout(title_text)
-        filename = 'results/target_region_2/html/start_dest.html'
+        filename = 'results/target_region_2/html/new_road.html'
 
         self.plot(data, layout, filename)
 
