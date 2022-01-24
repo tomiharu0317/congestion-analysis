@@ -249,6 +249,18 @@ w = ceil(max{道路の使用回数} / k)
 
 で計算し、これを各道路（エッジ）の重みとした。ダイクストラ法を用いて重み（所要時間）が最小となる経路をあるノードから目的地への最短時間経路としてプロットした。
 
-![min_time_path](results/target_region/images/min_time_path_to_dest.png)
+![min_time_path](results/target_region_2/images/min_time_path/min_time_path.png)
 
-![min_time_path](results/target_region/images/min_time_path_to_dest_zoom.png)
+### ランダムなノードからの最短時間距離
+
+![min_time_path_random](results/target_region_2/images/min_time_path/min_time_path_random.png)
+
+![min_time_path_random](results/target_region_2/images/min_time_path/min_time_path_random_1-5.png)
+
+### 新しい道路の設置
+
+新しい道路 1
+![newroad](results/target_region_2/images/new_road.png)
+
+新しい道路 2
+![newroad2](results/target_region_2/images/new_road2.png)
