@@ -36,6 +36,6 @@ class MakeNetwork():
     def osmnx_graph_to_graphml(self, G, filename):
         ox.save_graphml(G, filepath=filename)
 
-makenet = MakeNetwork()
-G = makenet.network_from_latlng(35.73, 35.65, 139.55, 139.33)
-makenet.osmnx_graph_to_graphml(G, 'data/road/target_region_2.graphml')
+# makenet = MakeNetwork()
+# G = makenet.network_from_latlng(35.73, 35.65, 139.55, 139.33)
+# makenet.osmnx_graph_to_graphml(G, 'data/road/target_region_2.graphml')

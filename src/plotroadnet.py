@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import japanize_matplotlib
 import plotly.graph_objects as go
 import plotly.express as px
-import manipulatecsv
 from initnetwork import InitNetwork
 from plot import PlotFunc
 
