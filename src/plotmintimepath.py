@@ -186,6 +186,6 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         return
 
 # node_li = ['948829609', '534240033']
-plot = PlotMinTimePath()
+# plot = PlotMinTimePath()
 # plot.plot_new_road(node_li)
-plot.main()
+# plot.main()
