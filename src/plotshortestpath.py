@@ -18,7 +18,7 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         self.node_data_dict = dict(self.G.nodes.data())
         self.initnet.__init__()
 
-    # latitudeが35.66以下のノードからスタートする
+    # latitudeが35.665以下のノードからスタートする
     # attributes name: y
     def retrieve_start_nodes(self):
 
@@ -29,27 +29,6 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
                 node_set.add(node)
 
         return node_set
-
-    def retrieve_motorway_nodes(self):
-
-        road_name_dict = nx.get_edge_attributes(self.G, 'name')
-
-        motorway_node_set = set()
-
-        for edge, name in road_name_dict.items():
-            if name == '中央自動車道' or '中央自動車道' in name:
-                source = edge[0]
-                target = edge[1]
-
-                motorway_node_set.add(source)
-                motorway_node_set.add(target)
-
-        # {'267803464', '260715070', '266949762', '267091414', '267803815',
-        # '267803466', '270617457', '287053476', '262596241', '267803515',
-        # '278281739', '6882442474', '286839315', '267803526', '260715121',
-        # '270491993', '267803495', '267803498', '267776680', '260715110',
-        # '260715011', '308923338', '260715112'}
-        return motorway_node_set
 
     def path_list_to_csv(self, path_list, header, filename):
 
@@ -68,7 +47,6 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         except Exception as e:
             print(e)
 
-    # 多対一の最短経路リスト取得関数
     # 中央自動車道の出口から昭和記念公園入口までの最短経路を算出
     def make_shortest_path_list(self, source_node_set, target_node, weight):
 
@@ -216,46 +194,59 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         # df = pd.read_csv('results/target_region_2/shortest_path_to_dest.csv')
         df = pd.read_csv(filename)
 
-        # shortest_path_list = list(df['shortest_ath'])
-        shortest_path_list = list(df['min_time_path'])
+        shortest_path_list = list(df['shortest_path'])
+        # shortest_path_list = list(df['min_time_path'])
         shortest_path_list = [shortest_path.split('-') for shortest_path in shortest_path_list]
 
         return shortest_path_list
 
     def plot_shortest_path(self):
 
-        node_li = ['921406627', '285331253']
-        source = node_li[0]
-        target = node_li[1]
+        # FIXME: この部分の汎用性を上げる
+        # 新しい道路の追加 --------------------------------------
+        # node_li = ['921406627', '285331253']
+        # source = node_li[0]
+        # target = node_li[1]
 
-        self.add_road(source, target)
+        # self.add_road(source, target)
 
-        edges_for_plotly = self.whole_edges_for_plotly()
-
+        # 目的地を可視化データとして作成して追加 -------------------
         dest_node_set = set()
-        dest_node_set.add('91204522')
-        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='red')
+        dest_node_set.add('912045522')
+        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='blue')
 
+        # エッジを可視化データとして作成して追加 -------------------
+        edges_for_plotly = self.whole_edges_for_plotly()
         data = [edges_for_plotly]
 
+        # 道路の長さを重みとして最短経路リストを作成 ---------------
         start_node_set = self.retrieve_start_nodes()
-        # start_node_for_plotly = self.node_set_to_nodes_for_plotly(start_node_set, size=4, color='red')
+        # shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'length')
 
-        shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'length')
-        # shortest_path_list = self.make_shortest_path_list_from_csv()
 
-        self.path_list_to_csv(shortest_path_list, 'shortest_path', 'results/target_region_2/shortest_path_to_dest.csv')
+        # csvファイルからリストを復元する ------------------------
+        shortest_path_list = self.make_shortest_path_list_from_csv('results/target_region_2/shortest_path_to_dest.csv')
 
-        # edge_appearance_list = self.make_edge_appearance_list(shortest_path_list) 
+        # 最短経路リストを保存 ----------------------------------
+        # self.path_list_to_csv(shortest_path_list, 'shortest_path', 'results/target_region_2/shortest_path_to_dest.csv')
+
+        # 最短経路リストから使用された回数をkey, その回数のエッジグループとエッジグループの大きさをvalueに持つ辞書を作成
+        # 辞書をもとに使用された回数の階級に基づいて異なる配色がされた可視化データを追加
         edge_used_num_dict = self.make_edge_used_num_dict(shortest_path_list) 
 
         class_size = self.sturges_rule(edge_used_num_dict)
-
         data = self.add_shortest_path_edges_for_plotly(edge_used_num_dict, class_size, data)
+        # ---------------------------------------------------
 
+        # 目的地の可視化データを追加（見栄えのため最後に追加する）----
         data.append(dest_node_for_plotly)
-        # # data.append(start_node_for_plotly)
 
+        # 出発地点の可視化データを追加（見栄えのため最後に追加する）--
+        # start_node_for_plotly = self.node_set_to_nodes_for_plotly(start_node_set, size=4, color='red')
+        # data.append(start_node_for_plotly)
+        
+        # FIXME: この部分の汎用性を上げる
+        # 新しい道路の可視化 ----------------------------------
         # for node in node_li:
 
         #     dest_node_set = set()
@@ -264,13 +255,37 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         #     dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=6, color='red')
 
         #     data.append(dest_node_for_plotly)
+        # --------------------------------------------------
 
-        title_text = '新しい道路'
-        layout = self.return_base_layout(title_text)
-        filename = 'results/target_region_2/html/new_road.html'
+        title_text = '昭和記念公園までの最短経路'
+        layout = self.return_base_layout(title_text, showlegend=True)
+        filename = 'results/target_region_2/html/shortest_path.html'
 
         self.plot(data, layout, filename)
 
+    # 非推奨
+    def retrieve_motorway_nodes(self):
+
+        road_name_dict = nx.get_edge_attributes(self.G, 'name')
+
+        motorway_node_set = set()
+
+        for edge, name in road_name_dict.items():
+            if name == '中央自動車道' or '中央自動車道' in name:
+                source = edge[0]
+                target = edge[1]
+
+                motorway_node_set.add(source)
+                motorway_node_set.add(target)
+
+        # {'267803464', '260715070', '266949762', '267091414', '267803815',
+        # '267803466', '270617457', '287053476', '262596241', '267803515',
+        # '278281739', '6882442474', '286839315', '267803526', '260715121',
+        # '270491993', '267803495', '267803498', '267776680', '260715110',
+        # '260715011', '308923338', '260715112'}
+        return motorway_node_set
+
+    # 非推奨
     def plot_motorway(self):
 
         motorway_node_set = self.retrieve_motorway_nodes()
@@ -279,7 +294,8 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         nodes_for_plotly = self.node_set_to_nodes_for_plotly(motorway_node_set, size=3, color='blue')
 
         data = [edges_for_plotly, nodes_for_plotly]
-        layout = self.return_base_layout()
+        title_text = '中央自動車道'
+        layout = self.return_base_layout(title_text, showlegend=False)
         filename = 'results/images/html/motorway_nodes.html'
 
         self.plot(data, layout, filename)
@@ -291,4 +307,4 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         return
 
 # plot = PlotShortestPath()
-# plot.plot_shortest_path()
+# plot.main()

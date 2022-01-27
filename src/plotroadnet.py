@@ -29,17 +29,17 @@ class PlotNetwork(PlotFunc, InitNetwork):
 
         if code == 1:
             data = [edges_for_plotly, nodes_for_plotly]
-            title_text = 'Road Network in Tachikawa'
+            title_text = '立川市の道路ネットワーク'
             filename = 'results/tachikawa/html/tachikawa.html'
 
         elif code == 2:
             data = [edges_for_plotly]
-            title_text = 'Road Network in target region'
+            title_text = '道路ネットワーク'
             filename = 'results/target_region/html/target_region.html'
 
         else :
             data = [edges_for_plotly]
-            title_text = 'Road Network in target region'
+            title_text = '道路ネットワーク'
             filename = 'results/target_region_2/html/target_region_2.html'
 
         layout = go.Layout(
@@ -80,7 +80,7 @@ class PlotNetwork(PlotFunc, InitNetwork):
         data = [edges_for_plotly, koushu_kaidou_edges_for_plotly]
 
         title_text = '甲州街道'
-        layout = self.return_base_layout(title_text)
+        layout = self.return_base_layout(title_text, showlegend=False)
         filename = 'results/target_region_2/html/kokushu_kaidou.html'
 
         self.plot(data, layout, filename)
@@ -109,7 +109,7 @@ class PlotNetwork(PlotFunc, InitNetwork):
         data = [edges_for_plotly, chuo_expressway_edges_for_plotly]
 
         title_text = '中央自動車道'
-        layout = self.return_base_layout(title_text)
+        layout = self.return_base_layout(title_text, showlegend=False)
         filename = 'results/target_region_2/html/chuo_expressway.html'
 
         self.plot(data, layout, filename)
@@ -128,7 +128,7 @@ class PlotNetwork(PlotFunc, InitNetwork):
         data = [edges_for_plotly, dest_node_for_plotly]
 
         title_text = '昭和記念公園立川口'
-        layout = self.return_base_layout(title_text)
+        layout = self.return_base_layout(title_text, showlegend=False)
         filename = 'results/target_region_2/html/destination.html'
 
         self.plot(data, layout, filename)
