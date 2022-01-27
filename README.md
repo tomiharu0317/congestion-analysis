@@ -241,7 +241,7 @@ w = ceil(max{道路の使用回数} / k)
 
 ### 昭和記念公園までの最短時間経路
 
-緯度 35.66 以南の 15850 個の交差点から昭和記念公園立川口への最短時間経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
+緯度 35.665 以南の 6774 個の交差点から昭和記念公園立川口への最短時間経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
 
 各道路を通過するのに要する時間は
 
@@ -262,5 +262,15 @@ w = ceil(max{道路の使用回数} / k)
 新しい道路 1
 ![newroad](results/target_region_2/images/new_road.png)
 
+結果
+
+![newroad](results/target_region_2/images/min_time_path/min_time_path_newroad1_50.png)
+
 新しい道路 2
 ![newroad2](results/target_region_2/images/new_road2.png)
+
+結果
+
+![newroad](results/target_region_2/images/min_time_path/min_time_path_newroad2_50.png)
+
+→ 新しい道路を設置しても最短時間経路は変化なし

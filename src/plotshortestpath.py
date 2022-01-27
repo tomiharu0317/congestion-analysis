@@ -257,7 +257,7 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         #     data.append(dest_node_for_plotly)
         # --------------------------------------------------
 
-        title_text = '緯度35.665以南の交差点から昭和記念公園までの最短経路'
+        title_text = '昭和記念公園までの最短経路'
         layout = self.return_base_layout(title_text, showlegend=True)
         filename = 'results/target_region_2/html/shortest_path.html'
 
@@ -306,5 +306,5 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
         return
 
-plot = PlotShortestPath()
-plot.main()
+# plot = PlotShortestPath()
+# plot.main()
