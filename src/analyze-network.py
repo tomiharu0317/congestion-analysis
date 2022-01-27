@@ -47,7 +47,7 @@ from plotroadnet import PlotFunc
 class AnalyzeNetwork(PlotFunc, InitNetwork):
 
     initnet = InitNetwork()
-    filename = 'results/basic_feature_value.csv'
+    filename = 'results/target_region_2/basic_feature_value.csv'
 
     def __init__(self):
         self.node_data_dict = dict(self.G.nodes.data())
@@ -250,7 +250,7 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
     # density ------------------------------------------------------------------------------------
     def calc_density(self):
         key = 'density'
-        density_val = nx.density(self.G)
+        density_val = round(nx.density(self.G),8)
 
         manipulatecsv.write_to_csv(key, density_val, self.filename)
 
@@ -366,10 +366,10 @@ class AnalyzeNetwork(PlotFunc, InitNetwork):
         fig.tight_layout()
         fig.savefig('results/target_region_2/images/degree_dist.jpg')
 
-# analyze = AnalyzeNetwork()
+analyze = AnalyzeNetwork()
 # analyze.num_of_nodes()
 # analyze.num_of_edges()
-# analyze.calc_density()
+analyze.calc_density()
 # analyze.calc_average_street_count()
 # analyze.plot_street_count_hist()
 # analyze.plot_street_count_dist()

@@ -1,0 +1,8 @@
+name,feature_values
+is_directed,True
+num_of_nodes,71532
+num_of_edges,194969
+average_degree,5.45
+density,3.8104e-05
+average_cluster_coefficient,0.0003444
+average_street_count,2.846
