@@ -144,32 +144,32 @@
 
 ### 道路ネットワーク
 
-![road_network_in_target_region](results/target_region/images/target_region_plotly.png)
+![road_network_in_target_region](results/target_region_2/images/roadnetwork.png)
 
 - Open Street Map から取得した道路ネットワーク（自動車が走行可能な道路を含み、歩道、自転車道などは含まない）
 - 以下の範囲内の道路を box として取得
 
 ```
-- 北緯：羽村駅(35.7582678)
-- 南緯：高尾山口駅(35.63224825)
-- 西経：高尾山口駅(139.2699457715528)
-- 東経：登戸駅(139.56954570683286)
+- 北緯：35.71
+- 南緯：35.655
+- 西経：139.33
+- 東経：139.55
 ```
 
-![showa_kine_park](results/target_region/images/showa_kinen_park.png)
+![showa_kine_park](results/target_region_2/images/showa_kinen_park.png)
 
-![showa_kine_park](results/target_region/images/chuo_expressway.png)
+![chuo_expressway](results/target_region_2/images/chuo_expressway.png)
 
-![showa_kine_park](results/target_region/images/koushu_kaidou.png)
+![koushu_kaidou](results/target_region_2/images/koushuu_kaidou.png)
 
 ## 分析方法
 
 1. 道路ネットワークの可視化 (ノード：交差点)
 2. ネットワークの基本特徴量を算出
 3. 中心性指標に基づいてグラデーションで色付けしプロット
-4. 緯度 35.66 以南の交差点から目的地までの最短経路を算出
+4. 緯度 35.665 以南の交差点から目的地までの最短経路を算出
 5. 最短経路に含まれている回数が多い道路ほど濃い色でプロット
-6. 緯度 35.66 以南の交差点から目的地までの最短時間経路を算出
+6. 緯度 35.665 以南の交差点から目的地までの最短時間経路を算出
 7. 最短時間経路に含まれている回数が多い道路ほど濃い色でプロット
 
 #### 基本特徴量
@@ -191,39 +191,39 @@
 
 ### 基本特徴量
 
-| 名前       | 値         |
-| ---------- | ---------- |
-| 有向グラフ | True       |
-| ノード数   | 71532      |
-| エッジ数   | 194969     |
-| 平均次数   | 2.846      |
-| 密度       | 3.8104e-05 |
+| 名前       | 値        |
+| ---------- | --------- |
+| 有向グラフ | True      |
+| ノード数   | 35235     |
+| エッジ数   | 95164     |
+| 平均次数   | 2.849     |
+| 密度       | 7.665e-05 |
 
 ### 次数のヒストグラム
 
-![degree_hist](results/target_region/images/degree_hist_2.jpg)
+![degree_hist](results/target_region_2/images/degree_hist.jpg)
 
 ### 次数分布
 
-![degree_dist](results/target_region/images/degree_dist_2.jpg)
+![degree_dist](results/target_region_2/images/degree_dist.jpg)
 
 ### 中心性指標に基づくプロット
 
 #### 次数中心性
 
 **入次数**
-![in_degree_centrality](results/target_region/images/in_degree_centrality.png)
+![in_degree_centrality](results/target_region_2/images/in_degree_centrality.png)
 
 **出次数**
-![out_degree_centrality](results/target_region/images/out_degree_centrality.png)
+![out_degree_centrality](results/target_region_2/images/out_degree_centrality.png)
 
 #### 固有値中心性
 
-![eigenvector_centrality](results/target_region/images/eigenvector_centrality.png)
+![eigenvector_centrality](results/target_region_2/images/eigenvector_centrality.png)
 
 ### 昭和記念公園までの最短経路
 
-緯度 35.66 以南の 15850 個の交差点から昭和記念公園立川口への最短経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
+緯度 35.665 以南の 6774 個の交差点から昭和記念公園立川口への最短経路を導出し、より多く使われている道路を濃い色でプロットした。図の凡例は使われた回数を意味している。
 
 重みを（交差点から交差点をつなぐ）道路の長さとして、ダイクストラ法を用いて重み（距離）が最小となる経路をあるノードから目的地への最短経路としてプロットした。
 
@@ -237,9 +237,7 @@ w = ceil(max{道路の使用回数} / k)
 
 として計算し、それぞれの階級に基づいて道路の色を決定した。
 
-![shortest_path](results/target_region/images/shortest_path_to_dest_pattern2.png)
-
-![shortest_path](results/target_region/images/shortest_path_to_dest_pattern2_zoom.png)
+![shortest_path](results/target_region_2/images/shortestpath.png)
 
 ### 昭和記念公園までの最短時間経路
 

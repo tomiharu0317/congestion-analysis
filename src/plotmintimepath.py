@@ -128,7 +128,7 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
         data.append(node_for_plotly)
         title_text = '新しい道路'
-        layout = self.return_base_layout(title_text)
+        layout = self.return_base_layout(title_text, showlegend=False)
         filename = 'results/target_region_2/html/newroad_2.html'
 
         self.plot(data, layout, filename)
@@ -173,7 +173,7 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         title_text = '新しい道路(40km/h)を追加した場合の昭和記念公園までの最短時間経路'
         # title_text = '新しい道路の最短経路'
 
-        layout = self.return_base_layout(title_text)
+        layout = self.return_base_layout(title_text, showlegend=True)
         filename = 'results/target_region_2/html/min_time_path_to_dest_newroad_2_40.html'
         # filename = 'results/target_region_2/html/shortest_path_using_newroad.html'
 
