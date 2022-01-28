@@ -128,8 +128,73 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
 
         self.plot(data, layout, filename)
 
+    def compare_results_to_csv(self, sum_of_length_list, sum_of_required_time_list):
+
+        results = []
+        n = len(sum_of_length_list)
+        for i in range(n):
+            result_dict = dict()
+            
+            if i == 0:
+                result_dict['name'] = 'mintimeroad'
+            elif i == 1:
+                result_dict['name'] = 'newroad1'
+            else:
+                result_dict['name'] = 'newroad2'
+
+            result_dict['length'] = sum_of_length_list[i]
+            result_dict['required_time'] = sum_of_required_time_list[i]
+
+            results.append(result_dict)
+
+        df = pd.json_normalize(results)
+        df.to_csv('results/target_region_2/csv/compareroads/length_requiredtime_comparison.csv', index=False)
+
+    def compare_length_requiredtime(self):
+
+        self.set_road()
+
+        # csvファイルからリストを復元する ------------------------
+        filename = 'results/target_region_2/csv/compareroads/mintimepath_eachroads.csv'
+        key = 'mintimepath'
+        path_list = self.make_shortest_path_list_from_csv(filename, key)
+
+        length_dict = nx.get_edge_attributes(self.G, name='length')
+        required_time_dict = nx.get_edge_attributes(self.G, name='required_time')
+
+        # 全体の最短時間経路: li[0], 新しい道路1: li[1], 新しい道路2: li[2]
+        sum_of_length_list = []
+        sum_of_required_time_list = []
+
+        for path in path_list:
+
+            sum_of_length = 0
+            sum_of_required_time = 0
+            num_of_edges = len(path)
+
+            for i in range(num_of_edges - 1):
+                key = (path[i], path[i+1], 0)
+
+                try:
+                    sum_of_length += float(length_dict[key])
+                    sum_of_required_time += float(required_time_dict[key])
+                
+                # 同じノードに対してエッジを張っている例外がある
+                # ('921406627', '921406627', 0)
+                # ('948829609', '948829609', 0)
+                except KeyError as e:
+                    print(e)
+                    continue
+
+            sum_of_length_list.append(round(sum_of_length, 3))
+            sum_of_required_time_list.append(round(sum_of_required_time, 5))
+
+        self.compare_results_to_csv(sum_of_length_list, sum_of_required_time_list)
+
     def main(self):
-        self.plot_target_roads()
+        # self.make_path_list()
+        # self.plot_target_roads()
+        self.compare_length_requiredtime()
 
 compare = CompareRoads()
 compare.main()
