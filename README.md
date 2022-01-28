@@ -201,25 +201,25 @@
 
 ### 次数のヒストグラム
 
-![degree_hist](results/target_region_2/images/degree_hist.jpg)
+![degree_hist](results/target_region_2/images/featureval/degree_hist.jpg)
 
 ### 次数分布
 
-![degree_dist](results/target_region_2/images/degree_dist.jpg)
+![degree_dist](results/target_region_2/images/featureval/degree_dist.jpg)
 
 ### 中心性指標に基づくプロット
 
 #### 次数中心性
 
 **入次数**
-![in_degree_centrality](results/target_region_2/images/in_degree_centrality.png)
+![in_degree_centrality](results/target_region_2/images/featureval/in_degree_centrality.png)
 
 **出次数**
-![out_degree_centrality](results/target_region_2/images/out_degree_centrality.png)
+![out_degree_centrality](results/target_region_2/images/featureval/out_degree_centrality.png)
 
 #### 固有値中心性
 
-![eigenvector_centrality](results/target_region_2/images/eigenvector_centrality.png)
+![eigenvector_centrality](results/target_region_2/images/featureval/eigenvector_centrality.png)
 
 ### 昭和記念公園までの最短経路
 
