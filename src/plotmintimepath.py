@@ -63,9 +63,6 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
         return maxspeed
 
-    def add_road(self, source_id, target_id, length, maxspeed):
-        self.G.add_edge(source_id, target_id, length=length, maxspeed=maxspeed)
-
     def add_required_time_attributes(self):
         required_time_dict = dict()
         
@@ -108,17 +105,23 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
         return node_set
 
+    def add_road(self, node_li, length, maxspeed):
+
+        source = node_li[0]
+        target = node_li[1]
+        
+        self.G.add_edge(source, target, length=length, maxspeed=maxspeed)
+        self.G.add_edge(target, source, length=length, maxspeed=maxspeed)
+
+
     def plot_new_road(self, node_li):
+
+        self.add_road(node_li, length='400', maxspeed='40')
 
         node_set = set()
 
         for node in node_li:
             node_set.add(node)
-
-        source = node_li[0]
-        target = node_li[1]
-        self.add_road(source, target, length='400', maxspeed='40')
-        self.add_road(target, source, length='400', maxspeed='40')
 
         node_for_plotly = self.node_set_to_nodes_for_plotly(node_set, size=6, color='red')
 
@@ -138,13 +141,12 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         # 新しい道路の設置 ----------------------------------------------
         # 新しい道路1
         # node_li = ['921406627', '285331253']
+        # length = '200', maxspeed = '40'
+        
         # 新しい道路2
         node_li = ['948829609', '534240033']
 
-        source = node_li[0]
-        target = node_li[1]
-        self.add_road(source, target, length='400', maxspeed='50')
-        self.add_road(target, source, length='400', maxspeed='50')
+        self.add_road(node_li, length='400', maxspeed='50')
 
         # 所要時間データを各エッジに追加
         self.add_required_time_attributes()
@@ -195,5 +197,5 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 # node_li = ['948829609', '534240033']
 # node_li = ['921406627', '285331253']
 # plot.plot_new_road(node_li)
-plot = PlotMinTimePath()
-plot.main()
+# plot = PlotMinTimePath()
+# plot.main()
