@@ -11,7 +11,9 @@
 
 立川市において、以下の道路が非常に混雑する問題がある。この混雑の要因を分析することが目的である。
 
-![shortest_path_googlemap](results/tachikawa/images/shortest_path_googlemap.png)
+![googlemap](results/tachikawa/images/shortest_path_googlemap.png)
+
+![analyze_target_road](results/target_region_2/images/analyze_target_road.png)
 
 ## データ
 

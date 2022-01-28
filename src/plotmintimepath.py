@@ -200,7 +200,7 @@ plot = PlotMinTimePath()
 # 新しい道路1
 # node_li = ['921406627', '285331253']
 # 新しい道路2
-node_li = ['948829609', '534240033']
-plot.plot_new_road(node_li, 2)
+# node_li = ['948829609', '534240033']
+# plot.plot_new_road(node_li, 2)
 
 # plot.main()

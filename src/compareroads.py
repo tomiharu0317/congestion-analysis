@@ -127,6 +127,31 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
 
         return data
 
+    # 分析対象の道路をプロット
+    def plot_analysis_target_road(self):
+
+        target_path = '366264680-979923567-285325889-979923580-979923714-285335391-366266710-366266713-3830690876-366266720-7684766678-366266728-2461361006-366266730-534240032-1422144385-2724829804-1422144390-534240033-534240045-1422144388-540040529-540041083-540036869-534229690-190138057-912045522'
+        path = target_path.split('-')
+        n = len(path)
+        edge_list = []
+
+        for i in range(n-1):
+            edge = (path[i], path[i+1])
+            edge_list.append(edge)
+
+        # エッジを可視化データとして作成して追加 -------------------
+        whole_edges_for_plotly = self.whole_edges_for_plotly()
+        data = [whole_edges_for_plotly]
+
+        edges_for_plotly = self.edge_set_to_edges_for_plotly(edge_list, width=6, color='red')
+        data.append(edges_for_plotly)
+
+        title_text = '混雑が頻繁に発生する道路'
+        layout = self.return_base_layout(title_text, showlegend=False)
+        filename = 'results/target_region_2/html/analyze_target_road.html'
+
+        self.plot(data, layout, filename)
+
     def plot_target_roads(self):
 
         # エッジを可視化データとして作成して追加 -------------------
@@ -357,9 +382,10 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
     def main(self):
         # self.make_path_list()
         # self.plot_target_roads()
-        self.compare_length_requiredtime()
-        self.plot_maxspeed()
+        # self.compare_length_requiredtime()
+        # self.plot_maxspeed()
         # self.check_road_length()
+        self.plot_analysis_target_road()
 
 compare = CompareRoads()
 compare.main()
