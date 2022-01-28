@@ -70,6 +70,21 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
         df = pd.DataFrame(path_dict)
         df.to_csv('results/target_region_2/csv/compareroads/mintimepath_eachroads.csv')
 
+    def make_start_dest_node_for_plotly(self, data, color):
+        # 目的地を可視化データとして作成して追加 
+        dest_node_set = set()
+        dest_node_set.add('912045522')
+        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=8, color=color)
+        data.append(dest_node_for_plotly)
+
+        # 出発地点を可視化データとして作成して追加
+        start_node_set = set()
+        start_node_set.add('366264680')
+        start_node_for_plotly = self.node_set_to_nodes_for_plotly(start_node_set, size=8, color=color)
+        data.append(start_node_for_plotly)
+
+        return data
+
     def plot_target_roads(self):
 
         # エッジを可視化データとして作成して追加 -------------------
@@ -109,19 +124,7 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
         data.append(road_data[-2])
         data.append(road_data[-3])
 
-        # 目的地を可視化データとして作成して追加 
-        dest_node_set = set()
-        dest_node_set.add('912045522')
-        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=8, color='red')
-        data.append(dest_node_for_plotly)
-
-        # 出発地点を可視化データとして作成して追加
-        start_node_set = set()
-        start_node_set.add('366264680')
-        start_node_for_plotly = self.node_set_to_nodes_for_plotly(start_node_set, size=8, color='red')
-        data.append(start_node_for_plotly)
-
-
+        data = self.make_start_dest_node_for_plotly(data, color='red')
         title_text = '3つの道路比較'
         layout = self.return_base_layout(title_text, showlegend=True)
         filename = 'results/target_region_2/html/compare_roads.html'
@@ -191,10 +194,91 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
 
         self.compare_results_to_csv(sum_of_length_list, sum_of_required_time_list)
 
+    def make_roadspeed_dict(self, path_list):
+
+        maxspeed_dict = nx.get_edge_attributes(self.G, name='maxspeed')
+        
+        # roadspeed_dict = {
+        #     speed: edge_list
+        #     }
+        # }
+        roadspeed_dict = dict()
+
+        for path in path_list:
+            num_of_edges = len(path)
+
+            for i in range(num_of_edges - 1):
+                key = (path[i], path[i+1], 0)
+                edge = (path[i], path[i+1])
+
+                try:
+                    maxspeed = float(maxspeed_dict[key])
+
+                # 最高速度が存在しない道路は大きな道路ではないと仮定して
+                # 20kmに設定
+                except KeyError as e:
+                    print(e)
+                    maxspeed = float(20)
+
+                if maxspeed in roadspeed_dict:
+                    roadspeed_dict[maxspeed].append(edge)
+                else:
+                    roadspeed_dict[maxspeed] = []
+                    roadspeed_dict[maxspeed].append(edge)
+
+        roadspeed_dict = dict(sorted(roadspeed_dict.items(), reverse=True))
+
+        return roadspeed_dict
+
+    def plot_maxspeed(self):
+
+        self.set_road()
+
+        # csvファイルからリストを復元する ------------------------
+        filename = 'results/target_region_2/csv/compareroads/mintimepath_eachroads.csv'
+        key = 'mintimepath'
+        path_list = self.make_shortest_path_list_from_csv(filename, key)
+
+        # 法定速度ごとにグループ化されたエッジリストを作成
+        roadspeed_dict = self.make_roadspeed_dict(path_list)
+
+        # エッジを可視化データとして作成して追加 -------------------
+        edges_for_plotly = self.whole_edges_for_plotly()
+        data = [edges_for_plotly]
+
+        # グループごとに異なる色をつけてプロット
+        for maxspeed, edge_list in roadspeed_dict.items():
+            
+            color = ''
+            if maxspeed == float(50):
+                index = 0
+                color = self.set_color(index)
+            elif maxspeed == float(40):
+                index = 3
+                color = self.set_color(index)
+            elif maxspeed == float(30):
+                index = 6
+                color = self.set_color(index)
+            else:
+                index = 9
+                color = self.set_color(index)
+
+            name = '法定速度' + str(int(maxspeed)) + 'km'
+            edges = self.edge_set_to_edges_for_plotly(edge_list, width=4, color=color, name=name)
+            data.append(edges)
+
+        data = self.make_start_dest_node_for_plotly(data, color='blue')
+        title_text = '3つの道路の法定速度比較'
+        layout = self.return_base_layout(title_text, showlegend=True)
+        filename = 'results/target_region_2/html/road_maxspeed_comparison.html'
+
+        self.plot(data, layout, filename)
+
     def main(self):
         # self.make_path_list()
         # self.plot_target_roads()
-        self.compare_length_requiredtime()
+        # self.compare_length_requiredtime()
+        self.plot_maxspeed()
 
 compare = CompareRoads()
 compare.main()

@@ -172,19 +172,16 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
     def add_shortest_path_edges_for_plotly(self, edge_used_num_dict, class_size, data):
 
         class_width = math.ceil(list(edge_used_num_dict.keys())[0] / class_size)
-
         edge_lists = [list() for i in range(class_size)]
 
         for num_used, val_dict in edge_used_num_dict.items():
 
             index = math.ceil(num_used / class_width)
-
             edge_lists[- index] += val_dict['edge_list']
 
         for index in range(class_size):
             
             edge_list = edge_lists[index]
-
             data = self.add_different_color_edges_to_data(edge_list, data, index, class_size, class_width)
 
         return data
@@ -219,7 +216,7 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         data = [edges_for_plotly]
 
         # 道路の長さを重みとして最短経路リストを作成 ---------------
-        start_node_set = self.retrieve_start_nodes()
+        # start_node_set = self.retrieve_start_nodes()
         # shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'length')
 
         # csvファイルからリストを復元する ------------------------
