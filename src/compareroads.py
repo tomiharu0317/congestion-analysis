@@ -72,12 +72,64 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
 
     def plot_target_roads(self):
 
-        # 目的地のノード
+        # エッジを可視化データとして作成して追加 -------------------
+        edges_for_plotly = self.whole_edges_for_plotly()
+        data = [edges_for_plotly]
+        
+        # csvファイルからリストを復元する ------------------------
+        filename = 'results/target_region_2/csv/compareroads/mintimepath_eachroads.csv'
+        key = 'mintimepath'
+        path_list = self.make_shortest_path_list_from_csv(filename, key)
+
+        color_list = ['rgb(228,26,28)', 'rgb(55,126,184)', 'rgb(77,175,74)']
+        roadname_list = ['最短時間経路', '新しい道路1', '新しい道路2']
+        num_of_path = len(path_list)
+
+        # 可視化の見栄えを良くするためにdataに追加する順番を変える
+        road_data = []
+
+        for i in range(num_of_path):
+
+            path = path_list[i]
+
+            edge_set = []
+            num_of_edges = len(path)
+
+            for source_j in range(num_of_edges - 1):                
+                source = path[source_j]
+                target = path[source_j + 1]
+
+                edge_set.append([source, target])
+
+            edges_for_plotly = self.edge_set_to_edges_for_plotly(edge_set, width=4, color=color_list[i], name=roadname_list[i])
+            road_data.append(edges_for_plotly)
+
+        # 可視化の見栄えを良くするためにdataに追加する順番を変える
+        data.append(road_data[-1])
+        data.append(road_data[-2])
+        data.append(road_data[-3])
+
+        # 目的地を可視化データとして作成して追加 
         dest_node_set = set()
         dest_node_set.add('912045522')
+        dest_node_for_plotly = self.node_set_to_nodes_for_plotly(dest_node_set, size=8, color='red')
+        data.append(dest_node_for_plotly)
+
+        # 出発地点を可視化データとして作成して追加
+        start_node_set = set()
+        start_node_set.add('366264680')
+        start_node_for_plotly = self.node_set_to_nodes_for_plotly(start_node_set, size=8, color='red')
+        data.append(start_node_for_plotly)
+
+
+        title_text = '3つの道路比較'
+        layout = self.return_base_layout(title_text, showlegend=True)
+        filename = 'results/target_region_2/html/compare_roads.html'
+
+        self.plot(data, layout, filename)
 
     def main(self):
-        self.make_path_list()
+        self.plot_target_roads()
 
 compare = CompareRoads()
 compare.main()

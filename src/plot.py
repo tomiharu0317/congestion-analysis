@@ -38,7 +38,7 @@ class PlotFunc(InitNetwork):
 
         return nodes
 
-    def edge_set_to_edges_for_plotly(self, edge_set, width, color):
+    def edge_set_to_edges_for_plotly(self, edge_set, width, color, name='None'):
 
         edge_x = []
         edge_y = []
@@ -63,14 +63,26 @@ class PlotFunc(InitNetwork):
             edge_x.append(None)
             edge_y.append(None)
 
-        edges = go.Scatter(
-            x = edge_x,
-            y = edge_y,
-            mode = 'lines',
-            opacity = 0.7,
-            line = dict(width = width, color=color),
-            showlegend=False
-        )
+        # 凡例をつけるか否か
+        if name == 'None':
+            edges = go.Scatter(
+                x = edge_x,
+                y = edge_y,
+                mode = 'lines',
+                opacity = 0.7,
+                line = dict(width = width, color=color),
+                showlegend=False
+            )
+        else:
+            edges = go.Scatter(
+                x = edge_x,
+                y = edge_y,
+                mode = 'lines',
+                opacity = 0.7,
+                line = dict(width = width, color=color),
+                name = name
+            )
+
 
         return edges
 

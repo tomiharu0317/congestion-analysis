@@ -189,13 +189,12 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
 
         return data
 
-    def make_shortest_path_list_from_csv(self, filename):
+    def make_shortest_path_list_from_csv(self, filename, key):
 
         # df = pd.read_csv('results/target_region_2/shortest_path_to_dest.csv')
         df = pd.read_csv(filename)
 
-        shortest_path_list = list(df['shortest_path'])
-        # shortest_path_list = list(df['min_time_path'])
+        shortest_path_list = list(df[key])
         shortest_path_list = [shortest_path.split('-') for shortest_path in shortest_path_list]
 
         return shortest_path_list
@@ -223,9 +222,8 @@ class PlotShortestPath(Centrality, PlotFunc, InitNetwork):
         start_node_set = self.retrieve_start_nodes()
         # shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'length')
 
-
         # csvファイルからリストを復元する ------------------------
-        shortest_path_list = self.make_shortest_path_list_from_csv('results/target_region_2/shortest_path_to_dest.csv')
+        shortest_path_list = self.make_shortest_path_list_from_csv('results/target_region_2/shortestpath/shortest_path_to_dest.csv', 'shortest_path')
 
         # 最短経路リストを保存 ----------------------------------
         # self.path_list_to_csv(shortest_path_list, 'shortest_path', 'results/target_region_2/shortest_path_to_dest.csv')

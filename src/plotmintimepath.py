@@ -170,7 +170,7 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         # start_node_set = self.retrieve_start_nodes_randomly()
 
         shortest_path_list = self.make_shortest_path_list(start_node_set, '912045522', 'required_time')
-        # shortest_path_list = self.make_shortest_path_list_from_csv('results/target_region_2/min_time_path_to_dest_newroad_40.csv')
+        # shortest_path_list = self.make_shortest_path_list_from_csv('results/target_region_2/min_time_path_to_dest_newroad_40.csv', 'min_time_path')
 
         self.path_list_to_csv(shortest_path_list, 'min_time_path', 'results/target_region_2/min_time_path_to_dest_newroad_2_50.csv')
 
