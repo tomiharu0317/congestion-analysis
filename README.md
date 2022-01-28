@@ -260,17 +260,67 @@ w = ceil(max{道路の使用回数} / k)
 ### 新しい道路の設置
 
 新しい道路 1
-![newroad](results/target_region_2/images/new_road.png)
+![newroad](results/target_region_2/images/newroad1.png)
 
 結果
 
 ![newroad](results/target_region_2/images/min_time_path/min_time_path_newroad1_50.png)
+![newroad](results/target_region_2/images/min_time_path/min_time_path_newroad1_50_zoom.png)
 
 新しい道路 2
-![newroad2](results/target_region_2/images/new_road2.png)
+![newroad2](results/target_region_2/images/newroad2.png)
 
 結果
 
 ![newroad](results/target_region_2/images/min_time_path/min_time_path_newroad2_50.png)
+![newroad](results/target_region_2/images/min_time_path/min_time_path_newroad2_50_zoom.png)
 
 → 新しい道路を設置しても最短時間経路は変化なし
+
+### 新しい道路の分析
+
+全体の最短時間経路/新しい道路 1 を通った上での最短時間経路/新しい道路 2 を通った上での最短時間経路
+
+![3roads_comparison](results/target_region_2/images/compare_roads/compare_3roads.png)
+
+| 経路名                  | 経路の長さ(m) | 所要時間(h) | 平均時速(km/h) |
+| ----------------------- | ------------- | ----------- | -------------- |
+| 最短時間経路            | 1984.18       | 0.06172     | 32.148         |
+| 新しい道路 1 を通る経路 | 1838.744      | 0.06721     | 27.358         |
+| 新しい道路 2 を通る経路 | 1907.462      | 0.06384     | 29.879         |
+
+法定速度別にそれぞれの経路をプロット
+![maxspeed_comparison](results/target_region_2/images/compare_roads/road_maxspeed_comparison_50.png)
+
+- 新しい道路 2 を通った上での最短時間経路と全体の最短時間経路はほとんど重なっている
+
+- また、新しい道路 2 は 50km/h なので所要時間が下回ってもおかしくない
+
+-> 新しい道路 2 への分岐点から新しい道路 2 の開始地点までの法定速度 20km/h 道路がネックとなっている
+
+この道路は**立川ウインズ通り**という名称で、調べた結果実際の法定速度は**40km/h**
+
+この道路の法定速度を 40km/h にする
+
+![maxspeed_comparison](results/target_region_2/images/compare_roads/road_maxspeed_comparison_50_updated.png)
+
+結果
+
+| 経路名                  | 経路の長さ(m) | 所要時間(h) | 平均時速(km/h) |
+| ----------------------- | ------------- | ----------- | -------------- |
+| 最短時間経路            | 1984.18       | 0.06172     | 32.148         |
+| 新しい道路 1 を通る経路 | 1838.744      | 0.06721     | 27.358         |
+| 新しい道路 2 を通る経路 | 1907.462      | **0.0578**  | **33.001**     |
+
+新しい道路 2 の設置により最短時間経路が変化した
+
+## 結論
+
+- 渋滞が頻発する道路は南から昭和記念公園へ来る場合の最短時間経路となっているため、集中する
+- 例として新しい道路 2 の設置によって最短時間経路が変化することから、効率的な配置から渋滞を分散させることができる可能性がある
+
+## 今後の課題
+
+- 法定速度がデータとして有していないエッジは主要な道路ではないと仮定して一律 20km/h とした
+- その結果として新しい道路 2 を設置した際の立川ウインズ通りのような、実際の法定速度とは異なる道路ネットワークが作成され、結果に影響を与えた
+- より正確性の高いデータを有した道路ネットワークの作成が求められる

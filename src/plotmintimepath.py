@@ -114,7 +114,7 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
         self.G.add_edge(target, source, length=length, maxspeed=maxspeed)
 
 
-    def plot_new_road(self, node_li):
+    def plot_new_road(self, node_li, roadnum):
 
         self.add_road(node_li, length='400', maxspeed='40')
 
@@ -122,17 +122,18 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
         for node in node_li:
             node_set.add(node)
-
+        
         node_for_plotly = self.node_set_to_nodes_for_plotly(node_set, size=6, color='red')
 
-        edges_for_plotly = self.whole_edges_for_plotly()
+        edge_for_plotly = self.edge_set_to_edges_for_plotly([node_li], width=4, color='red')        
+        whole_edges_for_plotly = self.whole_edges_for_plotly()
 
-        data = [edges_for_plotly, node_for_plotly]
+        data = [whole_edges_for_plotly, node_for_plotly, edge_for_plotly]
 
         data.append(node_for_plotly)
-        title_text = '新しい道路'
+        title_text = '新しい道路' + str(roadnum)
         layout = self.return_base_layout(title_text, showlegend=False)
-        filename = 'results/target_region_2/html/newroad.html'
+        filename = 'results/target_region_2/html/newroad' + str(roadnum) + '.html'
 
         self.plot(data, layout, filename)
 
@@ -194,8 +195,12 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
 
         return
 
-# node_li = ['948829609', '534240033']
+plot = PlotMinTimePath()
+
+# 新しい道路1
 # node_li = ['921406627', '285331253']
-# plot.plot_new_road(node_li)
-# plot = PlotMinTimePath()
+# 新しい道路2
+node_li = ['948829609', '534240033']
+plot.plot_new_road(node_li, 2)
+
 # plot.main()
