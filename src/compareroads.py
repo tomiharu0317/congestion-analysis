@@ -19,11 +19,53 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
     def set_road(self):
         # 新しい道路の追加
         road_li = [['921406627', '285331253'], ['948829609', '534240033']]
+
+        # 新しい道路を40km/hで設置
+        # self.add_road(road_li[0], length='200', maxspeed='40')
+        # self.add_road(road_li[1], length='400', maxspeed='40')     
+        # 新しい道路を50km/hで設置
         self.add_road(road_li[0], length='200', maxspeed='50')
         self.add_road(road_li[1], length='400', maxspeed='50')            
 
         # 所要時間データの追加
         self.add_required_time_attributes()
+
+    def update_road(self):
+
+        # 立川WINS通りの法定速度を実際の40km/hに変更する
+        # source: 3830690876
+        # target: 948829609
+        target_path = '3830690876-952992509-951001204-952992273-948829609'
+        
+        # 対象のエッジリストを作成
+        path = target_path.split('-')
+        n = len(path)
+        path_list = []
+        for i in range(n-1):
+            edge = (path[i], path[i+1], 0)
+            path_list.append(edge)
+
+        # maxspeed_dictを作成
+        maxspeed_dict_updated = dict()
+
+        maxspeed_dict = nx.get_edge_attributes(self.G, name='maxspeed')
+        maxspeed_defined_edges = set(maxspeed_dict.keys())
+        length_dict = nx.get_edge_attributes(self.G, name='length')
+
+        for edge, length in length_dict.items():
+
+            if edge in maxspeed_defined_edges:
+                maxspeed = self.shape_maxspeed(maxspeed_dict[edge])
+            else:
+                if edge in path_list:
+                    maxspeed = 40
+                else:
+                    maxspeed = 20
+
+            maxspeed_dict_updated[edge] = {'maxspeed': maxspeed}
+
+        nx.set_edge_attributes(self.G, maxspeed_dict_updated)
+
 
     def make_path_list(self):
 
@@ -147,13 +189,21 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
 
             result_dict['length'] = sum_of_length_list[i]
             result_dict['required_time'] = sum_of_required_time_list[i]
+            result_dict['average_speed'] = round(sum_of_length_list[i] / (sum_of_required_time_list[i] * 1000), 3)
 
             results.append(result_dict)
 
         df = pd.json_normalize(results)
-        df.to_csv('results/target_region_2/csv/compareroads/length_requiredtime_comparison.csv', index=False)
+        # df.to_csv('results/target_region_2/csv/compareroads/length_requiredtime_comparison.csv', index=False)
+
+        # update_road()をした場合
+        df.to_csv('results/target_region_2/csv/compareroads/length_requiredtime_comparison_updated.csv', index=False)
+
 
     def compare_length_requiredtime(self):
+
+        # 立川WINS通りの法定速度を20km/hから実際の40km/hに変更
+        self.update_road()
 
         self.set_road()
 
@@ -234,6 +284,9 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
 
         self.set_road()
 
+        # 立川WINS通りの法定速度を20km/hから実際の40km/hに変更
+        self.update_road()
+
         # csvファイルからリストを復元する ------------------------
         filename = 'results/target_region_2/csv/compareroads/mintimepath_eachroads.csv'
         key = 'mintimepath'
@@ -270,15 +323,45 @@ class CompareRoads(PlotMinTimePath, PlotShortestPath, Centrality, PlotFunc, Init
         data = self.make_start_dest_node_for_plotly(data, color='blue')
         title_text = '3つの道路の法定速度比較'
         layout = self.return_base_layout(title_text, showlegend=True)
-        filename = 'results/target_region_2/html/road_maxspeed_comparison.html'
+
+        # filename = 'results/target_region_2/html/road_maxspeed_comparison_50.html'
+
+        # update_road() した場合
+        filename = 'results/target_region_2/html/road_maxspeed_comparison_50_updated.html'
 
         self.plot(data, layout, filename)
+
+    def check_road_length(self):
+
+        # この道は新しい道路2より少し長いくらいなので400mちょいであることが予想される
+        # すなわち、新しい道路2の設定した長さが妥当かを確認している
+        target_path = '3830690876-366266720-7684766678-366266728-2461361006-366266730-534240032'
+        path = target_path.split('-')
+        n = len(path)
+
+        length_dict = nx.get_edge_attributes(self.G, name='length')
+        length = 0
+
+        for i in range(n - 1):
+            edge = (path[i], path[i+1], 0)
+            
+            try:
+                length += float(length_dict[edge])
+            except KeyError as e:
+                print(e)
+                continue
+
+        print(length)
+        # result -> 459.35
 
     def main(self):
         # self.make_path_list()
         # self.plot_target_roads()
-        # self.compare_length_requiredtime()
+        self.compare_length_requiredtime()
         self.plot_maxspeed()
+        # self.check_road_length()
 
 compare = CompareRoads()
 compare.main()
+
+# result -> ネックとなっていたのは法定速度20kmの立川WINS通り

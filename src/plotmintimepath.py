@@ -78,7 +78,7 @@ class PlotMinTimePath(PlotShortestPath, Centrality, PlotFunc, InitNetwork):
             else:
                 maxspeed = 20
             
-            # 時間単位:(分)
+            # 時間単位: m / (m (km * 1000) / h) (時間)
             required_time = (float(length) / (maxspeed * 1000))
 
             required_time_dict[edge] = {'required_time': float(required_time)}
