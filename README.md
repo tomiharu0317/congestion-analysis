@@ -1,4 +1,5 @@
-`src`フォルダの各ファイル・各関数の役割については[こちら](docs/src_files_role_explanation.md)を参照
+- 分析結果のレポートは[こちら](docs/congestion_analysis.pdf)
+- `src`フォルダの各ファイル・各関数の役割については[こちら](docs/src_files_role_explanation.md)を参照
 
 ## 目次
 
